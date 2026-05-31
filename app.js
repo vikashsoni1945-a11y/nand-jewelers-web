@@ -49,6 +49,11 @@ let name=document.getElementById("name").value;
 let mobile=document.getElementById("mobile").value;
 let balance=Number(document.getElementById("balance").value);
 
+if(name==="" || mobile==="" || balance===""){
+alert("Fill all customer fields");
+return;
+}
+
 customers.push({
 id:Date.now(),
 name:name,
@@ -58,16 +63,9 @@ balance:balance
 
 saveCustomers(customers);
 
-addLedger(
-mobile,
-name,
-"Opening Balance",
-balance,
-balance
-);
+addLedger(mobile,name,"Opening Balance",balance,balance);
 
 alert("Customer Saved");
-
 showCustomers();
 }
 
@@ -87,16 +85,9 @@ customer.balance=customer.balance-amount;
 
 saveCustomers(customers);
 
-addLedger(
-customer.mobile,
-customer.name,
-"Payment Received",
-amount,
-customer.balance
-);
+addLedger(customer.mobile,customer.name,"Payment Received",amount,customer.balance);
 
 alert("Payment Saved");
-
 showCustomers();
 }
 
@@ -110,9 +101,9 @@ let makingAmount=(goldValue*makingPercent)/100;
 let total=goldValue+makingAmount;
 
 return {
-goldValue: goldValue,
-makingAmount: makingAmount,
-total: total
+goldValue:goldValue,
+makingAmount:makingAmount,
+total:total
 };
 }
 
@@ -123,8 +114,6 @@ let weight=Number(document.getElementById("weight").value);
 let rate=Number(document.getElementById("rate").value);
 let makingPercent=Number(document.getElementById("making").value);
 
-let calc=calculatePurchase();
-
 let customers=getCustomers();
 let customer=customers.find(c=>c.mobile===mobile);
 
@@ -132,6 +121,8 @@ if(!customer){
 alert("Customer Not Found");
 return;
 }
+
+let calc=calculatePurchase();
 
 customer.balance=customer.balance+calc.total;
 
@@ -154,16 +145,9 @@ total:calc.total
 
 savePurchases(purchases);
 
-addLedger(
-customer.mobile,
-customer.name,
-"Gold Purchase - "+item,
-calc.total,
-customer.balance
-);
+addLedger(customer.mobile,customer.name,"Gold Purchase - "+item,calc.total,customer.balance);
 
 alert("Purchase Saved");
-
 showCustomers();
 }
 
@@ -184,7 +168,7 @@ return;
 
 let calc=calculatePurchase();
 
-document.getElementById("billResult").innerHTML =
+let billHTML =
 `
 <div class="bill">
 <h2>NAND JEWELERS</h2>
@@ -202,6 +186,8 @@ document.getElementById("billResult").innerHTML =
 <p>Thank you for shopping!</p>
 </div>
 `;
+
+document.getElementById("billResult").innerHTML=billHTML;
 }
 
 function searchCustomer(){
