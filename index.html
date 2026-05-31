@@ -12,75 +12,43 @@
 <h1>Nand Jewelers</h1>
 
 <h2>Add Customer</h2>
-
 <input id="name" placeholder="Customer Name">
 <input id="mobile" placeholder="Mobile Number">
 <input id="balance" placeholder="Opening Balance">
-
-<button onclick="addCustomer()">
-Add Customer
-</button>
+<button onclick="addCustomer()">Add Customer</button>
 
 <hr>
 
 <h2>Receive Payment</h2>
-
 <input id="payMobile" placeholder="Customer Mobile">
 <input id="payAmount" placeholder="Payment Amount">
-
-<button onclick="receivePayment()">
-Receive Payment
-</button>
+<button onclick="receivePayment()">Receive Payment</button>
 
 <hr>
 
 <h2>Gold Purchase</h2>
-
-<input id="purchaseMobile"
-placeholder="Customer Mobile">
-
-<input id="itemName"
-placeholder="Item Name">
-
-<input id="weight"
-placeholder="Weight">
-
-<input id="rate"
-placeholder="Gold Rate">
-
-<input id="making"
-placeholder="Making Charge">
-
-<button onclick="goldPurchase()">
-Save Purchase
-</button>
+<input id="purchaseMobile" placeholder="Customer Mobile">
+<input id="itemName" placeholder="Item Name">
+<input id="weight" placeholder="Weight in Gram">
+<input id="rate" placeholder="Gold Rate Per Gram">
+<input id="making" placeholder="Making Charge %">
+<button onclick="goldPurchase()">Save Purchase</button>
 
 <hr>
 
 <h2>Search Customer</h2>
-
-<input id="searchMobile"
-placeholder="Mobile Number">
-
-<button onclick="searchCustomer()">
-Search
-</button>
-
+<input id="searchMobile" placeholder="Mobile Number">
+<button onclick="searchCustomer()">Search</button>
 <div id="searchResult"></div>
 
 <hr>
 
 <h2>Customer List</h2>
-
-<button onclick="showCustomers()">
-Refresh List
-</button>
-
+<button onclick="showCustomers()">Refresh List</button>
 <div id="customerList"></div>
 
 </div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
