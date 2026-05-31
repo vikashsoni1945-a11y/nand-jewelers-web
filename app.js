@@ -1,359 +1,284 @@
-function getCustomers(){
-return JSON.parse(localStorage.getItem("customers")) || [];
-}
+const SUPABASE_URL = "https://ifmbflibzbocrfmqwgyd.supabase.co";
+const SUPABASE_KEY = "sb_publishable_daYW6h5n22EnWXRKqeKQbQ_LYH-NkrB";
 
-function saveCustomers(data){
-localStorage.setItem("customers", JSON.stringify(data));
-}
-
-function getLedger(){
-return JSON.parse(localStorage.getItem("ledger")) || [];
-}
-
-function saveLedger(data){
-localStorage.setItem("ledger", JSON.stringify(data));
-}
-
-function getPurchases(){
-return JSON.parse(localStorage.getItem("purchases")) || [];
-}
-
-function savePurchases(data){
-localStorage.setItem("purchases", JSON.stringify(data));
-}
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function getDateTime(){
-let now = new Date();
-return now.toLocaleString("en-IN");
+  return new Date().toLocaleString("en-IN");
 }
 
 function getTodayDate(){
-let now = new Date();
-return now.toLocaleDateString("en-IN");
+  return new Date().toLocaleDateString("en-IN");
 }
 
-function addLedger(mobile,name,type,amount,balance){
-let ledger=getLedger();
+async function addCustomer(){
+  let name = document.getElementById("name").value;
+  let mobile = document.getElementById("mobile").value;
+  let balance = Number(document.getElementById("balance").value);
 
-ledger.push({
-date:getDateTime(),
-day:getTodayDate(),
-mobile:mobile,
-name:name,
-type:type,
-amount:amount,
-balance:balance
-});
+  if(name==="" || mobile==="" || isNaN(balance)){
+    alert("Fill all fields");
+    return;
+  }
 
-saveLedger(ledger);
+  let { error } = await db.from("customers").insert([
+    { Name:name, Mobile:mobile, Balance:balance }
+  ]);
+
+  if(error){
+    alert("Customer Save Error: " + error.message);
+    return;
+  }
+
+  await db.from("ledger").insert([
+    {
+      Name:name,
+      Mobile:mobile,
+      Type:"Opening Balance",
+      Amount:balance,
+      Balance:balance
+    }
+  ]);
+
+  alert("Customer Saved in Cloud");
+  showCustomers();
 }
 
-function addCustomer(){
-let customers=getCustomers();
+async function showCustomers(){
+  let { data, error } = await db.from("customers").select("*");
 
-let name=document.getElementById("name").value;
-let mobile=document.getElementById("mobile").value;
-let balance=Number(document.getElementById("balance").value);
+  if(error){
+    document.getElementById("customerList").innerHTML = error.message;
+    return;
+  }
 
-if(name==="" || mobile==="" || isNaN(balance)){
-alert("Fill all customer fields");
-return;
+  let html = "";
+
+  data.forEach(c=>{
+    html += `
+    <div class="card">
+      Name: ${c.Name}<br>
+      Mobile: ${c.Mobile}<br>
+      Balance: ₹${c.Balance}
+    </div>
+    `;
+  });
+
+  document.getElementById("customerList").innerHTML = html;
 }
 
-customers.push({
-id:Date.now(),
-name:name,
-mobile:mobile,
-balance:balance
-});
+async function searchCustomer(){
+  let mobile = document.getElementById("searchMobile").value;
 
-saveCustomers(customers);
+  let { data, error } = await db
+    .from("customers")
+    .select("*")
+    .eq("Mobile", mobile)
+    .single();
 
-addLedger(
-mobile,
-name,
-"Opening Balance",
-balance,
-balance
-);
+  if(error || !data){
+    document.getElementById("searchResult").innerHTML = "Customer Not Found";
+    return;
+  }
 
-alert("Customer Saved");
-
-document.getElementById("name").value="";
-document.getElementById("mobile").value="";
-document.getElementById("balance").value="";
-
-showCustomers();
+  document.getElementById("searchResult").innerHTML = `
+  <div class="card">
+    Name: ${data.Name}<br>
+    Mobile: ${data.Mobile}<br>
+    Balance: ₹${data.Balance}
+  </div>
+  `;
 }
 
-function receivePayment(){
-let mobile=document.getElementById("payMobile").value;
-let amount=Number(document.getElementById("payAmount").value);
+async function receivePayment(){
+  let mobile = document.getElementById("payMobile").value;
+  let amount = Number(document.getElementById("payAmount").value);
 
-let customers=getCustomers();
-let customer=customers.find(c=>c.mobile===mobile);
+  let { data: customer, error } = await db
+    .from("customers")
+    .select("*")
+    .eq("Mobile", mobile)
+    .single();
 
-if(!customer){
-alert("Customer Not Found");
-return;
-}
+  if(error || !customer){
+    alert("Customer Not Found");
+    return;
+  }
 
-customer.balance=customer.balance-amount;
+  let newBalance = Number(customer.Balance) - amount;
 
-saveCustomers(customers);
+  await db
+    .from("customers")
+    .update({ Balance:newBalance })
+    .eq("Mobile", mobile);
 
-addLedger(
-customer.mobile,
-customer.name,
-"Payment Received",
-amount,
-customer.balance
-);
+  await db.from("ledger").insert([
+    {
+      Name:customer.Name,
+      Mobile:customer.Mobile,
+      Type:"Payment Received",
+      Amount:amount,
+      Balance:newBalance
+    }
+  ]);
 
-alert("Payment Saved");
-
-document.getElementById("payMobile").value="";
-document.getElementById("payAmount").value="";
-
-showCustomers();
+  alert("Payment Saved in Cloud");
+  showCustomers();
 }
 
 function calculatePurchase(){
-let weight=Number(document.getElementById("weight").value);
-let rate=Number(document.getElementById("rate").value);
-let makingPercent=Number(document.getElementById("making").value);
+  let weight = Number(document.getElementById("weight").value);
+  let rate = Number(document.getElementById("rate").value);
+  let makingPercent = Number(document.getElementById("making").value);
 
-let goldValue=weight*rate;
-let makingAmount=(goldValue*makingPercent)/100;
-let total=goldValue+makingAmount;
+  let goldValue = weight * rate;
+  let makingAmount = (goldValue * makingPercent) / 100;
+  let total = goldValue + makingAmount;
 
-return {
-goldValue:goldValue,
-makingAmount:makingAmount,
-total:total
-};
+  return { goldValue, makingAmount, total };
 }
 
-function goldPurchase(){
-let mobile=document.getElementById("purchaseMobile").value;
-let item=document.getElementById("itemName").value;
-let weight=Number(document.getElementById("weight").value);
-let rate=Number(document.getElementById("rate").value);
-let makingPercent=Number(document.getElementById("making").value);
+async function goldPurchase(){
+  let mobile = document.getElementById("purchaseMobile").value;
+  let item = document.getElementById("itemName").value;
+  let weight = Number(document.getElementById("weight").value);
+  let rate = Number(document.getElementById("rate").value);
+  let makingPercent = Number(document.getElementById("making").value);
 
-let customers=getCustomers();
-let customer=customers.find(c=>c.mobile===mobile);
+  let { data: customer, error } = await db
+    .from("customers")
+    .select("*")
+    .eq("Mobile", mobile)
+    .single();
 
-if(!customer){
-alert("Customer Not Found");
-return;
+  if(error || !customer){
+    alert("Customer Not Found");
+    return;
+  }
+
+  let calc = calculatePurchase();
+  let newBalance = Number(customer.Balance) + calc.total;
+
+  await db
+    .from("customers")
+    .update({ Balance:newBalance })
+    .eq("Mobile", mobile);
+
+  await db.from("purchases").insert([
+    {
+      mobile:customer.Mobile,
+      item_name:item,
+      weight:weight,
+      gold_rate:rate,
+      making_percent:makingPercent,
+      total_amount:calc.total
+    }
+  ]);
+
+  await db.from("ledger").insert([
+    {
+      Name:customer.Name,
+      Mobile:customer.Mobile,
+      Type:"Gold Purchase - " + item,
+      Amount:calc.total,
+      Balance:newBalance
+    }
+  ]);
+
+  alert("Purchase Saved in Cloud");
+  showCustomers();
 }
 
-let calc=calculatePurchase();
+async function generateBill(){
+  let mobile = document.getElementById("purchaseMobile").value;
+  let item = document.getElementById("itemName").value;
+  let weight = Number(document.getElementById("weight").value);
+  let rate = Number(document.getElementById("rate").value);
+  let makingPercent = Number(document.getElementById("making").value);
 
-customer.balance=customer.balance+calc.total;
+  let { data: customer, error } = await db
+    .from("customers")
+    .select("*")
+    .eq("Mobile", mobile)
+    .single();
 
-saveCustomers(customers);
+  if(error || !customer){
+    alert("Customer Not Found");
+    return;
+  }
 
-let purchases=getPurchases();
+  let calc = calculatePurchase();
 
-purchases.push({
-date:getDateTime(),
-day:getTodayDate(),
-mobile:customer.mobile,
-name:customer.name,
-item:item,
-weight:weight,
-rate:rate,
-makingPercent:makingPercent,
-goldValue:calc.goldValue,
-makingAmount:calc.makingAmount,
-total:calc.total
-});
-
-savePurchases(purchases);
-
-addLedger(
-customer.mobile,
-customer.name,
-"Gold Purchase - "+item,
-calc.total,
-customer.balance
-);
-
-alert("Purchase Saved");
-
-showCustomers();
+  document.getElementById("billResult").innerHTML = `
+  <div class="bill">
+    <h2>NAND JEWELERS</h2>
+    <p><b>Date:</b> ${getDateTime()}</p>
+    <p><b>Customer:</b> ${customer.Name}</p>
+    <p><b>Mobile:</b> ${customer.Mobile}</p>
+    <hr>
+    <p><b>Item:</b> ${item}</p>
+    <p><b>Weight:</b> ${weight} gm</p>
+    <p><b>Gold Rate:</b> ₹${rate}</p>
+    <p><b>Gold Value:</b> ₹${calc.goldValue}</p>
+    <p><b>Making (${makingPercent}%):</b> ₹${calc.makingAmount}</p>
+    <hr>
+    <h3>Total Bill: ₹${calc.total}</h3>
+    <p>Thank you for shopping!</p>
+  </div>
+  `;
 }
 
-function generateBill(){
-let mobile=document.getElementById("purchaseMobile").value;
-let item=document.getElementById("itemName").value;
-let weight=Number(document.getElementById("weight").value);
-let rate=Number(document.getElementById("rate").value);
-let makingPercent=Number(document.getElementById("making").value);
+async function showStatement(){
+  let mobile = document.getElementById("statementMobile").value;
 
-let customers=getCustomers();
-let customer=customers.find(c=>c.mobile===mobile);
+  let { data, error } = await db
+    .from("ledger")
+    .select("*")
+    .eq("Mobile", mobile);
 
-if(!customer){
-alert("Customer Not Found");
-return;
+  if(error || data.length===0){
+    document.getElementById("statementResult").innerHTML = "No Statement Found";
+    return;
+  }
+
+  let html = "";
+
+  data.forEach(e=>{
+    html += `
+    <div class="card">
+      Type: ${e.Type}<br>
+      Amount: ₹${e.Amount}<br>
+      Balance: ₹${e.Balance}
+    </div>
+    `;
+  });
+
+  document.getElementById("statementResult").innerHTML = html;
 }
 
-let calc=calculatePurchase();
+async function dailySalesReport(){
+  let { data:purchases } = await db.from("purchases").select("*");
+  let { data:ledger } = await db.from("ledger").select("*");
 
-document.getElementById("billResult").innerHTML =
-`
-<div class="bill">
-<h2>NAND JEWELERS</h2>
-<p><b>Date:</b> ${getDateTime()}</p>
-<p><b>Customer:</b> ${customer.name}</p>
-<p><b>Mobile:</b> ${customer.mobile}</p>
-<hr>
-<p><b>Item:</b> ${item}</p>
-<p><b>Weight:</b> ${weight} gm</p>
-<p><b>Gold Rate:</b> ₹${rate}</p>
-<p><b>Gold Value:</b> ₹${calc.goldValue}</p>
-<p><b>Making (${makingPercent}%):</b> ₹${calc.makingAmount}</p>
-<hr>
-<h3>Total Bill: ₹${calc.total}</h3>
-<p>Thank you for shopping!</p>
-</div>
-`;
-}
+  let totalSales = 0;
+  let totalPayments = 0;
 
-function searchCustomer(){
-let mobile=document.getElementById("searchMobile").value;
-let customers=getCustomers();
-let customer=customers.find(c=>c.mobile===mobile);
+  purchases.forEach(p=>{
+    totalSales += Number(p.total_amount || 0);
+  });
 
-if(!customer){
-document.getElementById("searchResult").innerHTML="Customer Not Found";
-return;
-}
+  ledger.forEach(l=>{
+    if(l.Type === "Payment Received"){
+      totalPayments += Number(l.Amount || 0);
+    }
+  });
 
-document.getElementById("searchResult").innerHTML=
-`
-<div class="card">
-Name: ${customer.name}<br>
-Mobile: ${customer.mobile}<br>
-Balance: ₹${customer.balance}
-</div>
-`;
-}
-
-function showStatement(){
-let mobile=document.getElementById("statementMobile").value;
-let ledger=getLedger();
-let entries=ledger.filter(e=>e.mobile===mobile);
-
-let html="";
-
-if(entries.length===0){
-document.getElementById("statementResult").innerHTML="No Statement Found";
-return;
-}
-
-entries.forEach(e=>{
-html+=`
-<div class="card">
-Date: ${e.date}<br>
-Type: ${e.type}<br>
-Amount: ₹${e.amount}<br>
-Balance: ₹${e.balance}
-</div>
-`;
-});
-
-document.getElementById("statementResult").innerHTML=html;
-}
-
-function dailySalesReport(){
-let today=getTodayDate();
-let purchases=getPurchases();
-let ledger=getLedger();
-
-let todaySales=0;
-let todayPayments=0;
-
-let html="";
-html += `<div class="card"><b>Today:</b> ${today}</div>`;
-
-html += "<h3>Sales</h3>";
-
-let salesFound=false;
-
-purchases.forEach(p=>{
-if(p.day===today){
-salesFound=true;
-todaySales += Number(p.total || 0);
-
-html += `
-<div class="card">
-Date: ${p.date}<br>
-Customer: ${p.name}<br>
-Item: ${p.item}<br>
-Gold Value: ₹${p.goldValue}<br>
-Making: ₹${p.makingAmount}<br>
-Total: ₹${p.total}
-</div>
-`;
-}
-});
-
-if(!salesFound){
-html += "<div class='card'>No sales today</div>";
-}
-
-html += "<h3>Payments</h3>";
-
-let paymentsFound=false;
-
-ledger.forEach(e=>{
-if(e.day===today && e.type==="Payment Received"){
-paymentsFound=true;
-todayPayments += Number(e.amount || 0);
-
-html += `
-<div class="card">
-Date: ${e.date}<br>
-Customer: ${e.name}<br>
-Payment: ₹${e.amount}
-</div>
-`;
-}
-});
-
-if(!paymentsFound){
-html += "<div class='card'>No payments today</div>";
-}
-
-html += `
-<div class="card">
-<b>Total Sales:</b> ₹${todaySales}<br>
-<b>Total Payment Received:</b> ₹${todayPayments}
-</div>
-`;
-
-document.getElementById("dailyReport").innerHTML=html;
-}
-
-function showCustomers(){
-let customers=getCustomers();
-let html="";
-
-customers.forEach(c=>{
-html+=`
-<div class="card">
-Name: ${c.name}<br>
-Mobile: ${c.mobile}<br>
-Balance: ₹${c.balance}
-</div>
-`;
-});
-
-document.getElementById("customerList").innerHTML=html;
+  document.getElementById("dailyReport").innerHTML = `
+  <div class="card">
+    <b>Total Sales:</b> ₹${totalSales}<br>
+    <b>Total Payment Received:</b> ₹${totalPayments}
+  </div>
+  `;
 }
 
 showCustomers();
