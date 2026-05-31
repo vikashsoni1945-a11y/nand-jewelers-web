@@ -99,4 +99,100 @@ let weight=Number(document.getElementById("weight").value);
 let rate=Number(document.getElementById("rate").value);
 let makingPercent=Number(document.getElementById("making").value);
 
-let goldValue=
+let goldValue=weight*rate;
+let makingAmount=(goldValue*makingPercent)/100;
+let total=goldValue+makingAmount;
+
+let customers=getCustomers();
+let customer=customers.find(c=>c.mobile===mobile);
+
+if(!customer){
+alert("Customer Not Found");
+return;
+}
+
+customer.balance=customer.balance+total;
+
+saveCustomers(customers);
+
+addLedger(
+customer.mobile,
+customer.name,
+"Gold Purchase - "+item,
+total,
+customer.balance
+);
+
+alert(
+"Gold Value: ₹"+goldValue+
+"\nMaking "+makingPercent+"%: ₹"+makingAmount+
+"\nTotal: ₹"+total
+);
+
+showCustomers();
+}
+
+function searchCustomer(){
+let mobile=document.getElementById("searchMobile").value;
+let customers=getCustomers();
+let customer=customers.find(c=>c.mobile===mobile);
+
+if(!customer){
+document.getElementById("searchResult").innerHTML="Customer Not Found";
+return;
+}
+
+document.getElementById("searchResult").innerHTML=
+`
+<div class="card">
+Name: ${customer.name}<br>
+Mobile: ${customer.mobile}<br>
+Balance: ₹${customer.balance}
+</div>
+`;
+}
+
+function showStatement(){
+let mobile=document.getElementById("statementMobile").value;
+let ledger=getLedger();
+let entries=ledger.filter(e=>e.mobile===mobile);
+
+let html="";
+
+if(entries.length===0){
+document.getElementById("statementResult").innerHTML="No Statement Found";
+return;
+}
+
+entries.forEach(e=>{
+html+=`
+<div class="card">
+Date: ${e.date}<br>
+Type: ${e.type}<br>
+Amount: ₹${e.amount}<br>
+Balance: ₹${e.balance}
+</div>
+`;
+});
+
+document.getElementById("statementResult").innerHTML=html;
+}
+
+function showCustomers(){
+let customers=getCustomers();
+let html="";
+
+customers.forEach(c=>{
+html+=`
+<div class="card">
+Name: ${c.name}<br>
+Mobile: ${c.mobile}<br>
+Balance: ₹${c.balance}
+</div>
+`;
+});
+
+document.getElementById("customerList").innerHTML=html;
+}
+
+showCustomers();
