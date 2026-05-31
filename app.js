@@ -1,90 +1,178 @@
 function getCustomers(){
-  return JSON.parse(localStorage.getItem("customers")) || [];
+return JSON.parse(
+localStorage.getItem("customers")
+) || [];
 }
 
-function saveCustomers(customers){
-  localStorage.setItem("customers", JSON.stringify(customers));
-}
-
-function showTab(tabId){
-  let tabs = document.querySelectorAll(".tab");
-  tabs.forEach(tab => tab.classList.add("hidden"));
-  document.getElementById(tabId).classList.remove("hidden");
+function saveCustomers(data){
+localStorage.setItem(
+"customers",
+JSON.stringify(data)
+);
 }
 
 function addCustomer(){
-  let name = document.getElementById("name").value;
-  let mobile = document.getElementById("mobile").value;
-  let balance = document.getElementById("balance").value;
 
-  if(name === "" || mobile === "" || balance === ""){
-    alert("Please fill all fields");
-    return;
-  }
+let customers=getCustomers();
 
-  let customers = getCustomers();
+customers.push({
+id:Date.now(),
+name:document.getElementById("name").value,
+mobile:document.getElementById("mobile").value,
+balance:Number(
+document.getElementById("balance").value
+)
+});
 
-  customers.push({
-    id: customers.length + 1,
-    name: name,
-    mobile: mobile,
-    balance: Number(balance)
-  });
+saveCustomers(customers);
 
-  saveCustomers(customers);
+alert("Customer Saved");
 
-  alert("Customer added successfully");
+showCustomers();
 
-  document.getElementById("name").value = "";
-  document.getElementById("mobile").value = "";
-  document.getElementById("balance").value = "";
-
-  showCustomers();
 }
 
-function showCustomers(){
-  let customers = getCustomers();
-  let list = document.getElementById("customerList");
+function receivePayment(){
 
-  list.innerHTML = "";
+let mobile=
+document.getElementById("payMobile").value;
 
-  if(customers.length === 0){
-    list.innerHTML = "<p>No customers found</p>";
-    return;
-  }
+let amount=
+Number(
+document.getElementById("payAmount").value
+);
 
-  customers.forEach(customer => {
-    list.innerHTML += `
-      <div class="card">
-        <b>ID:</b> ${customer.id}<br>
-        <b>Name:</b> ${customer.name}<br>
-        <b>Mobile:</b> ${customer.mobile}<br>
-        <b>Balance:</b> ₹${customer.balance}
-      </div>
-    `;
-  });
+let customers=getCustomers();
+
+let customer=
+customers.find(
+c=>c.mobile===mobile
+);
+
+if(!customer){
+alert("Customer Not Found");
+return;
+}
+
+customer.balance=
+customer.balance-amount;
+
+saveCustomers(customers);
+
+alert("Payment Saved");
+
+showCustomers();
+
+}
+
+function goldPurchase(){
+
+let mobile=
+document.getElementById("purchaseMobile").value;
+
+let item=
+document.getElementById("itemName").value;
+
+let weight=
+Number(
+document.getElementById("weight").value
+);
+
+let rate=
+Number(
+document.getElementById("rate").value
+);
+
+let making=
+Number(
+document.getElementById("making").value
+);
+
+let total=
+(weight*rate)+making;
+
+let customers=getCustomers();
+
+let customer=
+customers.find(
+c=>c.mobile===mobile
+);
+
+if(!customer){
+alert("Customer Not Found");
+return;
+}
+
+customer.balance=
+customer.balance+total;
+
+saveCustomers(customers);
+
+alert(
+item+" Saved\nTotal ₹"+total
+);
+
+showCustomers();
+
 }
 
 function searchCustomer(){
-  let mobile = document.getElementById("searchMobile").value;
-  let customers = getCustomers();
-  let result = document.getElementById("searchResult");
 
-  let customer = customers.find(c => c.mobile === mobile);
+let mobile=
+document.getElementById("searchMobile").value;
 
-  if(!customer){
-    result.innerHTML = "<p>Customer not found</p>";
-    return;
-  }
+let customers=getCustomers();
 
-  result.innerHTML = `
-    <div class="card">
-      <b>Customer Found</b><br>
-      <b>Name:</b> ${customer.name}<br>
-      <b>Mobile:</b> ${customer.mobile}<br>
-      <b>Balance:</b> ₹${customer.balance}
-    </div>
-  `;
+let customer=
+customers.find(
+c=>c.mobile===mobile
+);
+
+if(!customer){
+
+document.getElementById(
+"searchResult"
+).innerHTML=
+"Customer Not Found";
+
+return;
+}
+
+document.getElementById(
+"searchResult"
+).innerHTML=
+`
+<div class="card">
+Name: ${customer.name}<br>
+Mobile: ${customer.mobile}<br>
+Balance: ₹${customer.balance}
+</div>
+`;
+
+}
+
+function showCustomers(){
+
+let customers=getCustomers();
+
+let html="";
+
+customers.forEach(c=>{
+
+html+=`
+<div class="card">
+Name: ${c.name}<br>
+Mobile: ${c.mobile}<br>
+Balance: ₹${c.balance}
+</div>
+`;
+
+});
+
+document.getElementById(
+"customerList"
+).innerHTML=html;
+
 }
 
 showCustomers();
