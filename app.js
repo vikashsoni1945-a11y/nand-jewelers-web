@@ -45,10 +45,13 @@ async function addCustomer(){
 }
 
 async function showCustomers(){
-  let { data, error } = await db.from("customers").select("*");
+
+  let { data, error } = await db
+    .from("customers")
+    .select("*");
 
   if(error){
-    document.getElementById("customerList").innerHTML = error.message;
+    alert("List Error: " + error.message);
     return;
   }
 
@@ -57,9 +60,9 @@ async function showCustomers(){
   data.forEach(c=>{
     html += `
     <div class="card">
-      Name: ${c.Name}<br>
-      Mobile: ${c.Mobile}<br>
-      Balance: ₹${c.Balance}
+      Name: ${c.name || c.Name}<br>
+      Mobile: ${c.mobile || c.Mobile}<br>
+      Balance: ₹${c.balance || c.Balance}
     </div>
     `;
   });
