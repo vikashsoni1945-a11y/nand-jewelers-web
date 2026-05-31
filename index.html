@@ -1,7 +1,56 @@
-<input type="text" id="name" placeholder="Customer Name">
-<input type="text" id="mobile" placeholder="Mobile Number">
-<input type="number" id="balance" placeholder="Opening Balance">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nand Jewelers Web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<button onclick="addCustomer()">Add Customer</button>
+<div class="container">
+  <h1>Nand Jewelers</h1>
+
+  <div class="tabs">
+    <button onclick="showTab('customer')">Customers</button>
+    <button onclick="showTab('payment')">Payment</button>
+    <button onclick="showTab('purchase')">Purchase</button>
+    <button onclick="showTab('reports')">Reports</button>
+  </div>
+
+  <div id="customer" class="tab">
+    <h2>Add Customer</h2>
+    <input type="text" id="name" placeholder="Customer Name">
+    <input type="text" id="mobile" placeholder="Mobile Number">
+    <input type="number" id="balance" placeholder="Opening Balance">
+    <button onclick="addCustomer()">Add Customer</button>
+
+    <h2>Search Customer</h2>
+    <input type="text" id="searchMobile" placeholder="Enter Mobile Number">
+    <button onclick="searchCustomer()">Search</button>
+
+    <div id="searchResult"></div>
+
+    <h2>Customer List</h2>
+    <button onclick="showCustomers()">Refresh List</button>
+    <div id="customerList"></div>
+  </div>
+
+  <div id="payment" class="tab hidden">
+    <h2>Receive Payment</h2>
+    <p>Next step में बनेगा</p>
+  </div>
+
+  <div id="purchase" class="tab hidden">
+    <h2>Gold Purchase</h2>
+    <p>Next step में बनेगा</p>
+  </div>
+
+  <div id="reports" class="tab hidden">
+    <h2>Reports</h2>
+    <p>Next step में बनेगा</p>
+  </div>
+</div>
 
 <script src="app.js"></script>
+</body>
+</html>
