@@ -272,6 +272,7 @@ async function generateBill(){
 }
 
 async function showStatement(){
+
   let mobile = document.getElementById("statementMobile").value;
 
   let { data, error } = await db
@@ -281,20 +282,18 @@ async function showStatement(){
     .order("created_at", { ascending: true });
 
   if(error || !data || data.length === 0){
-    document.getElementById("statementResult").innerHTML = "No Statement Found";
+    document.getElementById("statementResult").innerHTML =
+    "No Statement Found";
     return;
   }
 
   let html = "";
 
   data.forEach(e=>{
-    let dateTime = e.created_at
-      ? new Date(e.created_at).toLocaleString("en-IN")
-      : "";
 
     html += `
     <div class="card">
-      Date & Time: ${dateTime}<br>
+      Date & Time: ${e.created_at || ""}<br>
       Type: ${e.type || ""}<br>
       Amount: ₹${e.amount || 0}<br>
       Balance: ₹${e.balance || 0}
