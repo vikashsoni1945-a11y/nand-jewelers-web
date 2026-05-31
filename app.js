@@ -51,6 +51,12 @@ let goldValue=weight*rate;
 let makingAmount=(goldValue*makingPercent)/100;
 let total=goldValue+makingAmount;
 
+alert(
+"Gold Value: ₹"+goldValue+
+"\nMaking "+makingPercent+"%: ₹"+makingAmount+
+"\nTotal: ₹"+total
+);
+
 let customers=getCustomers();
 let customer=customers.find(c=>c.mobile===mobile);
 
@@ -60,16 +66,7 @@ return;
 }
 
 customer.balance=customer.balance+total;
-
 saveCustomers(customers);
-
-alert(
-item+" Saved\n"+
-"Gold Value ₹"+goldValue+"\n"+
-"Making ₹"+makingAmount+"\n"+
-"Total ₹"+total
-);
-
 showCustomers();
 }
 
