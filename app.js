@@ -27,11 +27,17 @@ let now = new Date();
 return now.toLocaleString("en-IN");
 }
 
+function getTodayDate(){
+let now = new Date();
+return now.toLocaleDateString("en-IN");
+}
+
 function addLedger(mobile,name,type,amount,balance){
 let ledger=getLedger();
 
 ledger.push({
 date:getDateTime(),
+day:getTodayDate(),
 mobile:mobile,
 name:name,
 type:type,
@@ -49,11 +55,6 @@ let name=document.getElementById("name").value;
 let mobile=document.getElementById("mobile").value;
 let balance=Number(document.getElementById("balance").value);
 
-if(name==="" || mobile==="" || balance===""){
-alert("Fill all customer fields");
-return;
-}
-
 customers.push({
 id:Date.now(),
 name:name,
@@ -63,7 +64,13 @@ balance:balance
 
 saveCustomers(customers);
 
-addLedger(mobile,name,"Opening Balance",balance,balance);
+addLedger(
+mobile,
+name,
+"Opening Balance",
+balance,
+balance
+);
 
 alert("Customer Saved");
 showCustomers();
@@ -85,7 +92,13 @@ customer.balance=customer.balance-amount;
 
 saveCustomers(customers);
 
-addLedger(customer.mobile,customer.name,"Payment Received",amount,customer.balance);
+addLedger(
+customer.mobile,
+customer.name,
+"Payment Received",
+amount,
+customer.balance
+);
 
 alert("Payment Saved");
 showCustomers();
@@ -132,6 +145,7 @@ let purchases=getPurchases();
 
 purchases.push({
 date:getDateTime(),
+day:getTodayDate(),
 mobile:customer.mobile,
 name:customer.name,
 item:item,
@@ -145,7 +159,13 @@ total:calc.total
 
 savePurchases(purchases);
 
-addLedger(customer.mobile,customer.name,"Gold Purchase - "+item,calc.total,customer.balance);
+addLedger(
+customer.mobile,
+customer.name,
+"Gold Purchase - "+item,
+calc.total,
+customer.balance
+);
 
 alert("Purchase Saved");
 showCustomers();
@@ -168,7 +188,7 @@ return;
 
 let calc=calculatePurchase();
 
-let billHTML =
+document.getElementById("billResult").innerHTML =
 `
 <div class="bill">
 <h2>NAND JEWELERS</h2>
@@ -186,8 +206,6 @@ let billHTML =
 <p>Thank you for shopping!</p>
 </div>
 `;
-
-document.getElementById("billResult").innerHTML=billHTML;
 }
 
 function searchCustomer(){
@@ -234,6 +252,58 @@ Balance: ₹${e.balance}
 });
 
 document.getElementById("statementResult").innerHTML=html;
+}
+
+function dailySalesReport(){
+let today=getTodayDate();
+let purchases=getPurchases();
+let ledger=getLedger();
+
+let todaySales=0;
+let todayPayments=0;
+let html="<h3>Today Report</h3>";
+
+html += `<p><b>Date:</b> ${today}</p>`;
+
+html += "<h3>Sales</h3>";
+
+purchases.forEach(p=>{
+if(p.day===today){
+todaySales += p.total;
+
+html += `
+<div class="card">
+Customer: ${p.name}<br>
+Item: ${p.item}<br>
+Total: ₹${p.total}
+</div>
+`;
+}
+});
+
+html += "<h3>Payments</h3>";
+
+ledger.forEach(e=>{
+if(e.day===today && e.type==="Payment Received"){
+todayPayments += e.amount;
+
+html += `
+<div class="card">
+Customer: ${e.name}<br>
+Payment: ₹${e.amount}
+</div>
+`;
+}
+});
+
+html += `
+<div class="card">
+<b>Total Sales:</b> ₹${todaySales}<br>
+<b>Total Payment Received:</b> ₹${todayPayments}
+</div>
+`;
+
+document.getElementById("dailyReport").innerHTML=html;
 }
 
 function showCustomers(){
