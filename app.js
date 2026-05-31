@@ -14,6 +14,14 @@ function saveLedger(data){
 localStorage.setItem("ledger", JSON.stringify(data));
 }
 
+function getPurchases(){
+return JSON.parse(localStorage.getItem("purchases")) || [];
+}
+
+function savePurchases(data){
+localStorage.setItem("purchases", JSON.stringify(data));
+}
+
 function getDateTime(){
 let now = new Date();
 return now.toLocaleString("en-IN");
@@ -92,9 +100,7 @@ alert("Payment Saved");
 showCustomers();
 }
 
-function goldPurchase(){
-let mobile=document.getElementById("purchaseMobile").value;
-let item=document.getElementById("itemName").value;
+function calculatePurchase(){
 let weight=Number(document.getElementById("weight").value);
 let rate=Number(document.getElementById("rate").value);
 let makingPercent=Number(document.getElementById("making").value);
@@ -102,6 +108,22 @@ let makingPercent=Number(document.getElementById("making").value);
 let goldValue=weight*rate;
 let makingAmount=(goldValue*makingPercent)/100;
 let total=goldValue+makingAmount;
+
+return {
+goldValue: goldValue,
+makingAmount: makingAmount,
+total: total
+};
+}
+
+function goldPurchase(){
+let mobile=document.getElementById("purchaseMobile").value;
+let item=document.getElementById("itemName").value;
+let weight=Number(document.getElementById("weight").value);
+let rate=Number(document.getElementById("rate").value);
+let makingPercent=Number(document.getElementById("making").value);
+
+let calc=calculatePurchase();
 
 let customers=getCustomers();
 let customer=customers.find(c=>c.mobile===mobile);
@@ -111,25 +133,75 @@ alert("Customer Not Found");
 return;
 }
 
-customer.balance=customer.balance+total;
+customer.balance=customer.balance+calc.total;
 
 saveCustomers(customers);
+
+let purchases=getPurchases();
+
+purchases.push({
+date:getDateTime(),
+mobile:customer.mobile,
+name:customer.name,
+item:item,
+weight:weight,
+rate:rate,
+makingPercent:makingPercent,
+goldValue:calc.goldValue,
+makingAmount:calc.makingAmount,
+total:calc.total
+});
+
+savePurchases(purchases);
 
 addLedger(
 customer.mobile,
 customer.name,
 "Gold Purchase - "+item,
-total,
+calc.total,
 customer.balance
 );
 
-alert(
-"Gold Value: ₹"+goldValue+
-"\nMaking "+makingPercent+"%: ₹"+makingAmount+
-"\nTotal: ₹"+total
-);
+alert("Purchase Saved");
 
 showCustomers();
+}
+
+function generateBill(){
+let mobile=document.getElementById("purchaseMobile").value;
+let item=document.getElementById("itemName").value;
+let weight=Number(document.getElementById("weight").value);
+let rate=Number(document.getElementById("rate").value);
+let makingPercent=Number(document.getElementById("making").value);
+
+let customers=getCustomers();
+let customer=customers.find(c=>c.mobile===mobile);
+
+if(!customer){
+alert("Customer Not Found");
+return;
+}
+
+let calc=calculatePurchase();
+
+document.getElementById("billResult").innerHTML =
+`
+<div class="bill">
+<h2>NAND JEWELERS</h2>
+<p><b>Date:</b> ${getDateTime()}</p>
+<p><b>Customer:</b> ${customer.name}</p>
+<p><b>Mobile:</b> ${customer.mobile}</p>
+<hr>
+<p><b>Item:</b> ${item}</p>
+<p><b>Weight:</b> ${weight} gm</p>
+<p><b>Gold Rate:</b> ₹${rate}</p>
+<p><b>Gold Value:</b> ₹${calc.goldValue}</p>
+<p><b>Making (${makingPercent}%):</b> ₹${calc.makingAmount}</p>
+<hr>
+<h3>Total Bill: ₹${calc.total}</h3>
+<p>Thank you for shopping!</p>
+</div>
+`;
 }
 
 function searchCustomer(){
