@@ -7,6 +7,10 @@ function getDateTime(){
   return new Date().toLocaleString("en-IN");
 }
 
+function getISOTime(){
+  return new Date().toISOString();
+}
+
 async function addCustomer(){
   let name = document.getElementById("name").value;
   let mobile = document.getElementById("mobile").value;
@@ -36,7 +40,8 @@ async function addCustomer(){
       mobile: mobile,
       type: "Opening Balance",
       amount: balance,
-      balance: balance
+      balance: balance,
+      created_at: getISOTime()
     }
   ]);
 
@@ -133,7 +138,8 @@ async function receivePayment(){
       mobile: mobile,
       type: "Payment Received",
       amount: amount,
-      balance: newBalance
+      balance: newBalance,
+      created_at: getISOTime()
     }
   ]);
 
@@ -200,7 +206,8 @@ async function goldPurchase(){
       weight: weight,
       gold_rate: rate,
       making_percent: makingPercent,
-      total_amount: calc.total
+      total_amount: calc.total,
+      created_at: getISOTime()
     }
   ]);
 
@@ -210,7 +217,8 @@ async function goldPurchase(){
       mobile: mobile,
       type: "Gold Purchase - " + item,
       amount: calc.total,
-      balance: newBalance
+      balance: newBalance,
+      created_at: getISOTime()
     }
   ]);
 
@@ -269,7 +277,8 @@ async function showStatement(){
   let { data, error } = await db
     .from("ledger")
     .select("*")
-    .eq("mobile", mobile);
+    .eq("mobile", mobile)
+    .order("created_at", { ascending: true });
 
   if(error || !data || data.length === 0){
     document.getElementById("statementResult").innerHTML = "No Statement Found";
@@ -279,8 +288,13 @@ async function showStatement(){
   let html = "";
 
   data.forEach(e=>{
+    let dateTime = e.created_at
+      ? new Date(e.created_at).toLocaleString("en-IN")
+      : "";
+
     html += `
     <div class="card">
+      Date & Time: ${dateTime}<br>
       Type: ${e.type || ""}<br>
       Amount: ₹${e.amount || 0}<br>
       Balance: ₹${e.balance || 0}
