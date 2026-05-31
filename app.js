@@ -55,6 +55,11 @@ let name=document.getElementById("name").value;
 let mobile=document.getElementById("mobile").value;
 let balance=Number(document.getElementById("balance").value);
 
+if(name==="" || mobile==="" || isNaN(balance)){
+alert("Fill all customer fields");
+return;
+}
+
 customers.push({
 id:Date.now(),
 name:name,
@@ -73,6 +78,11 @@ balance
 );
 
 alert("Customer Saved");
+
+document.getElementById("name").value="";
+document.getElementById("mobile").value="";
+document.getElementById("balance").value="";
+
 showCustomers();
 }
 
@@ -101,6 +111,10 @@ customer.balance
 );
 
 alert("Payment Saved");
+
+document.getElementById("payMobile").value="";
+document.getElementById("payAmount").value="";
+
 showCustomers();
 }
 
@@ -168,6 +182,7 @@ customer.balance
 );
 
 alert("Purchase Saved");
+
 showCustomers();
 }
 
@@ -261,40 +276,58 @@ let ledger=getLedger();
 
 let todaySales=0;
 let todayPayments=0;
-let html="<h3>Today Report</h3>";
 
-html += `<p><b>Date:</b> ${today}</p>`;
+let html="";
+html += `<div class="card"><b>Today:</b> ${today}</div>`;
 
 html += "<h3>Sales</h3>";
 
+let salesFound=false;
+
 purchases.forEach(p=>{
 if(p.day===today){
-todaySales += p.total;
+salesFound=true;
+todaySales += Number(p.total || 0);
 
 html += `
 <div class="card">
+Date: ${p.date}<br>
 Customer: ${p.name}<br>
 Item: ${p.item}<br>
+Gold Value: ₹${p.goldValue}<br>
+Making: ₹${p.makingAmount}<br>
 Total: ₹${p.total}
 </div>
 `;
 }
 });
 
+if(!salesFound){
+html += "<div class='card'>No sales today</div>";
+}
+
 html += "<h3>Payments</h3>";
+
+let paymentsFound=false;
 
 ledger.forEach(e=>{
 if(e.day===today && e.type==="Payment Received"){
-todayPayments += e.amount;
+paymentsFound=true;
+todayPayments += Number(e.amount || 0);
 
 html += `
 <div class="card">
+Date: ${e.date}<br>
 Customer: ${e.name}<br>
 Payment: ₹${e.amount}
 </div>
 `;
 }
 });
+
+if(!paymentsFound){
+html += "<div class='card'>No payments today</div>";
+}
 
 html += `
 <div class="card">
