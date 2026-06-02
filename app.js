@@ -1105,3 +1105,54 @@ window.showCustomerNotes = showCustomerNotes;
 
 window.addCustomerNote = addCustomerNote;
 window.showCustomerNotes = showCustomerNotes;
+
+async function showDepositHistory(){
+  let input = document.getElementById("depositCustomer").value;
+  let c = await findCustomer(input);
+
+  if(!c){
+    document.getElementById("depositHistory").innerHTML =
+    "Customer Not Found";
+    return;
+  }
+
+  let { data, error } = await db
+    .from("deposits")
+    .select("*")
+    .or(`mobile.eq.${c.mobile},name.eq.${c.Name}`)
+    .order("created_at", {ascending:false});
+
+  if(error){
+    document.getElementById("depositHistory").innerHTML =
+    "Deposit Error: " + error.message;
+    return;
+  }
+
+  let html = `
+  <div class="card">
+    <b>Customer:</b> ${c.Name || ""}<br>
+    <b>Mobile:</b> ${c.mobile || "No Mobile"}
+  </div>
+  `;
+
+  if(!data || data.length === 0){
+    html += `<div class="card">No Deposit Found</div>`;
+  }
+
+  (data || []).forEach(d=>{
+    html += `
+    <div class="card">
+      <b>Date & Time:</b> ${dateTime(d.created_at)}<br>
+      <b>Type:</b> ${d.deposit_type || ""}<br>
+      <b>Weight:</b> ${d.weight || "-"}<br>
+      <b>Purity:</b> ${d.purity || "-"}<br>
+      <b>Value:</b> ${money(d.value)}<br>
+      <b>Note:</b> ${d.note || ""}
+    </div>
+    `;
+  });
+
+  document.getElementById("depositHistory").innerHTML = html;
+}
+
+window.showDepositHistory = showDepositHistory;
