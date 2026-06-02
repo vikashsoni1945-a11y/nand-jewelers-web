@@ -848,3 +848,169 @@ function downloadStatementPDF(){
 
 showCustomers();
 updateDashboard();
+
+async function loadCustomerForEdit(){
+  let input = document.getElementById("editCustomerSearch").value;
+  let c = await findCustomer(input);
+
+  if(!c){
+    alert("Customer Not Found");
+    return;
+  }
+
+  loadedEditCustomer = c;
+
+  document.getElementById("editName").value = c.Name || "";
+  document.getElementById("editFather").value = c.father_name || "";
+  document.getElementById("editCity").value = c.city || "";
+  document.getElementById("editMobile").value = c.mobile || "";
+  document.getElementById("editBalance").value = c.balance || 0;
+
+  alert("Customer Loaded");
+}
+
+async function updateCustomer(){
+  if(!loadedEditCustomer){
+    alert("पहले customer load करो");
+    return;
+  }
+
+  let { error } = await db.from("customers")
+    .update({
+      Name: document.getElementById("editName").value,
+      father_name: document.getElementById("editFather").value,
+      city: document.getElementById("editCity").value,
+      mobile: document.getElementById("editMobile").value,
+      balance: Number(document.getElementById("editBalance").value)
+    })
+    .eq("id", loadedEditCustomer.id);
+
+  if(error){
+    alert("Update Error: " + error.message);
+    return;
+  }
+
+  alert("Customer Updated");
+  loadedEditCustomer = null;
+  showCustomers();
+  updateDashboard();
+}
+
+async function deleteCustomer(){
+  if(!loadedEditCustomer){
+    alert("पहले customer load करो");
+    return;
+  }
+
+  if(!confirm("Delete this customer?")){
+    return;
+  }
+
+  let { error } = await db.from("customers")
+    .delete()
+    .eq("id", loadedEditCustomer.id);
+
+  if(error){
+    alert("Delete Error: " + error.message);
+    return;
+  }
+
+  alert("Customer Deleted");
+  loadedEditCustomer = null;
+  showCustomers();
+  updateDashboard();
+}
+
+function downloadStatementPDF(){
+  alert("PDF button working. पहले View Statement दबाओ.");
+
+  if(!lastStatementCustomer){
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.text("NAND JEWELERS - Statement", 10, 10);
+  doc.text("Customer: " + lastStatementCustomer.Name, 10, 20);
+
+  let y = 30;
+
+  (lastStatementData || []).forEach(row=>{
+    doc.text(
+      dateTime(row.created_at) + " | " + row.type + " | " + row.amount,
+      10,
+      y
+    );
+    y += 8;
+  });
+
+  doc.save("statement.pdf");
+}
+
+function downloadPendingPDF(){
+  alert("Pending PDF working. पहले Pending Customers Report दबाओ.");
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.text("NAND JEWELERS - Pending Report", 10, 10);
+
+  let text = document.getElementById("pendingReport").innerText || "No Data";
+  doc.text(text, 10, 20);
+
+  doc.save("pending-report.pdf");
+}
+
+function downloadAdvancePDF(){
+  alert("Advance PDF working. पहले Advance Customers Report दबाओ.");
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.text("NAND JEWELERS - Advance Report", 10, 10);
+
+  let text = document.getElementById("advanceReport").innerText || "No Data";
+  doc.text(text, 10, 20);
+
+  doc.save("advance-report.pdf");
+}
+
+async function dailyClosing(){
+  let { data: ledger } = await db.from("ledger").select("*");
+  let { data: expenses } = await db.from("expenses").select("*");
+
+  let collection = 0;
+  let deposit = 0;
+  let expenseTotal = 0;
+
+  (ledger || []).forEach(l=>{
+    let type = l.type || "";
+
+    if(type.includes("Payment")){
+      collection += Number(l.amount || 0);
+    }
+
+    if(type.includes("Deposit")){
+      deposit += Number(l.amount || 0);
+    }
+  });
+
+  (expenses || []).forEach(e=>{
+    expenseTotal += Number(e.amount || 0);
+  });
+
+  let cash = collection + deposit - expenseTotal;
+
+  document.getElementById("dailyClosingResult").innerHTML = `
+    <div class="card">
+      <h3>Daily Closing</h3>
+      Total Collection: ${money(collection)}<br>
+      Total Deposit: ${money(deposit)}<br>
+      Total Expense: ${money(expenseTotal)}<br>
+      <b>Cash In Hand: ${money(cash)}</b>
+    </div>
+  `;
+
+  alert("Daily Closing Report Ready");
+}
