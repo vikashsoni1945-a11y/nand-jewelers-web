@@ -3,7 +3,10 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nand Jewelers</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 body{font-family:Arial;background:#f4f4f4;margin:0;padding:10px}
 .container{max-width:1200px;margin:auto}
@@ -16,9 +19,10 @@ h1,h2{text-align:center}
 .bill{border:2px solid #8b0045;padding:15px;background:#fff}
 </style>
 </head>
-<body>
 
+<body>
 <div class="container">
+
 <h1>💎 NAND JEWELERS</h1>
 
 <div class="dashboard">
@@ -44,6 +48,23 @@ h1,h2{text-align:center}
 <input id="searchText" placeholder="Name or Mobile">
 <button onclick="searchCustomer()">Search</button>
 <div id="searchResult"></div>
+</div>
+
+<div class="card">
+<h2>Edit / Delete Customer</h2>
+<input id="editCustomerSearch" placeholder="Customer Name or Mobile">
+<button onclick="loadCustomerForEdit()">Load Customer</button>
+
+<input id="editName" placeholder="New Name">
+<input id="editFather" placeholder="New Father Name">
+<input id="editCity" placeholder="New City">
+<input id="editMobile" placeholder="New Mobile">
+<input id="editBalance" placeholder="New Balance">
+
+<button onclick="updateCustomer()">Update Customer</button>
+<button onclick="deleteCustomer()">Delete Customer</button>
+
+<div id="editResult"></div>
 </div>
 
 <div class="card">
@@ -99,17 +120,27 @@ h1,h2{text-align:center}
 <h2>Customer Statement</h2>
 <input id="statementCustomer" placeholder="Customer Name or Mobile">
 <button onclick="showStatement()">View Statement</button>
+<button onclick="downloadStatementPDF()">Download Statement PDF</button>
 <div id="statementResult"></div>
 </div>
 
 <div class="card">
 <h2>Reports</h2>
+
 <button onclick="pendingReport()">Pending Customers Report</button>
 <div id="pendingReport"></div>
+
 <button onclick="advanceReport()">Advance Customers Report</button>
 <div id="advanceReport"></div>
+
+<button onclick="downloadPendingPDF()">Download Pending PDF</button>
+<button onclick="downloadAdvancePDF()">Download Advance PDF</button>
+
 <button onclick="cashBook()">Cash Book</button>
 <div id="cashBookResult"></div>
+
+<button onclick="dailyClosing()">Daily Closing Report</button>
+<div id="dailyClosingResult"></div>
 </div>
 
 <div class="card">
