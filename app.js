@@ -1264,3 +1264,47 @@ window.showExpenseHistory = showExpenseHistory;
 window.monthlyReport = monthlyReport;
 window.showExpenseHistory = showExpenseHistory;
 window.monthlyReport = monthlyReport;
+
+function downloadBillPDF(){
+  let billText = document.getElementById("billResult").innerText;
+
+  if(!billText || billText.trim() === ""){
+    alert("पहले Generate Bill दबाओ");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.text("NAND JEWELERS - Bill Invoice", 10, 10);
+
+  let lines = doc.splitTextToSize(billText, 180);
+  doc.text(lines, 10, 20);
+
+  doc.save("nand-jewelers-bill.pdf");
+}
+
+function shareStatementWhatsApp(){
+  if(!lastStatementCustomer || !lastStatementData){
+    alert("पहले View Statement दबाओ");
+    return;
+  }
+
+  let msg = "NAND JEWELERS STATEMENT%0A";
+  msg += "Customer: " + (lastStatementCustomer.Name || "") + "%0A";
+  msg += "Mobile: " + (lastStatementCustomer.mobile || "No Mobile") + "%0A";
+  msg += "Balance: " + money(lastStatementCustomer.balance) + "%0A%0A";
+
+  (lastStatementData || []).forEach(row=>{
+    msg += dateTime(row.created_at) + "%0A";
+    msg += row.type + "%0A";
+    msg += "Amount: " + money(row.amount) + "%0A";
+    msg += "Balance: " + money(row.balance) + "%0A%0A";
+  });
+
+  let url = "https://wa.me/?text=" + msg;
+  window.open(url, "_blank");
+}
+
+window.downloadBillPDF = downloadBillPDF;
+window.shareStatementWhatsApp = shareStatementWhatsApp;
