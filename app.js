@@ -1157,3 +1157,108 @@ async function showDepositHistory(){
 
 window.showDepositHistory = showDepositHistory;
 window.showDepositHistory = showDepositHistory;
+
+async function showExpenseHistory(){
+  let { data, error } = await db
+    .from("expenses")
+    .select("*")
+    .order("created_at", {ascending:false});
+
+  if(error){
+    document.getElementById("expenseHistory").innerHTML =
+    "Expense Error: " + error.message;
+    return;
+  }
+
+  let html = "<h3>Expense History</h3>";
+  let total = 0;
+
+  if(!data || data.length === 0){
+    html += `<div class="card">No Expense Found</div>`;
+  }
+
+  (data || []).forEach(e=>{
+    total += Number(e.amount || 0);
+
+    html += `
+    <div class="card">
+      <b>Date & Time:</b> ${dateTime(e.created_at)}<br>
+      <b>Category:</b> ${e.category || ""}<br>
+      <b>Description:</b> ${e.description || ""}<br>
+      <b>Amount:</b> ${money(e.amount)}
+    </div>
+    `;
+  });
+
+  html += `
+  <div class="card">
+    <b>Total Expense:</b> ${money(total)}
+  </div>
+  `;
+
+  document.getElementById("expenseHistory").innerHTML = html;
+}
+
+async function monthlyReport(){
+  let { data: ledger } = await db.from("ledger").select("*");
+  let { data: expenses } = await db.from("expenses").select("*");
+  let { data: purchases } = await db.from("purchases").select("*");
+  let { data: deposits } = await db.from("deposits").select("*");
+
+  let totalSales = 0;
+  let totalCollection = 0;
+  let totalDeposits = 0;
+  let totalExpense = 0;
+
+  (purchases || []).forEach(p=>{
+    totalSales += Number(p.total_amount || 0);
+  });
+
+  (ledger || []).forEach(l=>{
+    let type = l.type || "";
+
+    if(type.includes("Payment")){
+      totalCollection += Number(l.amount || 0);
+    }
+  });
+
+  (deposits || []).forEach(d=>{
+    totalDeposits += Number(d.value || 0);
+  });
+
+  (expenses || []).forEach(e=>{
+    totalExpense += Number(e.amount || 0);
+  });
+
+  let netCash = totalCollection + totalDeposits - totalExpense;
+
+  let html = `
+  <div class="card">
+    <h3>Monthly Report</h3>
+    <b>Total Sales:</b> ${money(totalSales)}<br>
+    <b>Total Collection:</b> ${money(totalCollection)}<br>
+    <b>Total Deposit Value:</b> ${money(totalDeposits)}<br>
+    <b>Total Expense:</b> ${money(totalExpense)}<br>
+    <hr>
+    <b>Net Cash:</b> ${money(netCash)}
+  </div>
+  `;
+
+  document.getElementById("monthlyReportResult").innerHTML = html;
+
+  let monthName = new Date().toLocaleString("en-IN", {
+    month: "long",
+    year: "numeric"
+  });
+
+  await db.from("monthly_reports").insert([{
+    month: monthName,
+    income: totalCollection + totalDeposits,
+    expense: totalExpense,
+    profit: netCash,
+    created_at: nowISO()
+  }]);
+}
+
+window.showExpenseHistory = showExpenseHistory;
+window.monthlyReport = monthlyReport;
