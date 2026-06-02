@@ -11,7 +11,7 @@
 body{font-family:Arial;background:#f4f4f4;margin:0;padding:10px}
 .container{max-width:1200px;margin:auto}
 .card{background:white;padding:15px;margin:10px 0;border-radius:10px;box-shadow:0 2px 5px #ccc}
-input,select{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
 button{width:100%;padding:12px;background:#8b0045;color:white;border:none;border-radius:6px;margin-top:6px;font-weight:bold}
 h1,h2{text-align:center}
 .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
@@ -40,6 +40,7 @@ h1,h2{text-align:center}
 <input id="city" placeholder="City">
 <input id="mobile" placeholder="Mobile Optional">
 <input id="balance" placeholder="Opening Balance">
+<textarea id="customerNotes" placeholder="Customer Notes"></textarea>
 <button onclick="addCustomer()">Save Customer</button>
 </div>
 
@@ -60,11 +61,21 @@ h1,h2{text-align:center}
 <input id="editCity" placeholder="New City">
 <input id="editMobile" placeholder="New Mobile">
 <input id="editBalance" placeholder="New Balance">
+<textarea id="editNotes" placeholder="Customer Notes"></textarea>
 
 <button onclick="updateCustomer()">Update Customer</button>
 <button onclick="deleteCustomer()">Delete Customer</button>
 
 <div id="editResult"></div>
+</div>
+
+<div class="card">
+<h2>Customer Notes</h2>
+<input id="noteCustomer" placeholder="Customer Name or Mobile">
+<textarea id="noteText" placeholder="Write Note"></textarea>
+<button onclick="addCustomerNote()">Save Note</button>
+<button onclick="showCustomerNotes()">Show Note History</button>
+<div id="noteResult"></div>
 </div>
 
 <div class="card">
@@ -87,6 +98,8 @@ h1,h2{text-align:center}
 <input id="depositValue" placeholder="Manual Value Amount">
 <input id="depositNote" placeholder="Note">
 <button onclick="saveDeposit()">Save Deposit</button>
+<button onclick="showDepositHistory()">Show Deposit History</button>
+<div id="depositHistory"></div>
 </div>
 
 <div class="card">
@@ -98,6 +111,7 @@ h1,h2{text-align:center}
 <input id="making" placeholder="Making %">
 <button onclick="goldPurchase()">Save Purchase</button>
 <button onclick="generateBill()">Generate Bill</button>
+<button onclick="downloadBillPDF()">Download Bill PDF</button>
 <div id="billResult"></div>
 </div>
 
@@ -114,6 +128,8 @@ h1,h2{text-align:center}
 <input id="expenseDescription" placeholder="Description">
 <input id="expenseAmount" placeholder="Amount">
 <button onclick="addExpense()">Save Expense</button>
+<button onclick="showExpenseHistory()">Show Expense History</button>
+<div id="expenseHistory"></div>
 </div>
 
 <div class="card">
@@ -121,6 +137,7 @@ h1,h2{text-align:center}
 <input id="statementCustomer" placeholder="Customer Name or Mobile">
 <button onclick="showStatement()">View Statement</button>
 <button onclick="downloadStatementPDF()">Download Statement PDF</button>
+<button onclick="shareStatementWhatsApp()">Share Statement WhatsApp</button>
 <div id="statementResult"></div>
 </div>
 
@@ -141,6 +158,9 @@ h1,h2{text-align:center}
 
 <button onclick="dailyClosing()">Daily Closing Report</button>
 <div id="dailyClosingResult"></div>
+
+<button onclick="monthlyReport()">Monthly Report</button>
+<div id="monthlyReportResult"></div>
 </div>
 
 <div class="card">
