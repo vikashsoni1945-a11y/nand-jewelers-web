@@ -1156,3 +1156,5 @@ async function showDepositHistory(){
 }
 
 window.showDepositHistory = showDepositHistory;
+alert("DEPOSIT HISTORY LOADED");
+window.showDepositHistory = showDepositHistory;
