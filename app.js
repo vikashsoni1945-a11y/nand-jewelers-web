@@ -1102,3 +1102,7 @@ window.addCustomerNote = addCustomerNote;
 window.showCustomerNotes = showCustomerNotes;
 window.addCustomerNote = addCustomerNote;
 window.showCustomerNotes = showCustomerNotes;
+alert("NOTES PART LOADED");
+
+window.addCustomerNote = addCustomerNote;
+window.showCustomerNotes = showCustomerNotes;
