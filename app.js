@@ -3,339 +3,41 @@ const SUPABASE_KEY = "sb_publishable_daYW6h5n22EnWXRKqeKQbQ_LYH-NkrB";
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function formatMoney(amount){
-  return "₹" + Number(amount || 0).toFixed(2);
+function money(v){
+  return "₹" + Number(v || 0).toFixed(2);
 }
 
-function formatDate(dateValue){
-  if(!dateValue) return "";
-  return new Date(dateValue).toLocaleString("en-IN");
-}
-
-function getISOTime(){
+function nowISO(){
   return new Date().toISOString();
 }
 
-async function addLedger(name, mobile, type, amount, balance){
-  await db.from("ledger").insert([{
-    name: name,
-    mobile: mobile,
-    type: type,
-    amount: amount,
-    balance: balance,
-    created_at: getISOTime()
-  }]);
+function dateTime(v){
+  if(!v) return "";
+  return new Date(v).toLocaleString("en-IN");
 }
 
-async function addCustomer(){
-  let name = document.getElementById("name").value.trim();
-  let fatherName = document.getElementById("fatherName").value.trim();
-  let city = document.getElementById("city").value.trim();
-  let mobile = document.getElementById("mobile").value.trim();
-  let balance = Number(document.getElementById("balance").value);
+async function findCustomer(input){
+  input = (input || "").trim().toLowerCase();
+  if(!input) return null;
 
-  if(name === "" || isNaN(balance)){
-    alert("Customer Name और Opening Balance जरूरी है");
-    return;
-  }
-
-  let { error } = await db.from("customers").insert([{
-    Name: name,
-    father_name: fatherName,
-    city: city,
-    mobile: mobile,
-    balance: balance
-  }]);
-
-  if(error){
-    alert("Customer Save Error: " + error.message);
-    return;
-  }
-
-  await addLedger(name, mobile, "Opening Balance", balance, balance);
-
-  alert("Customer Saved");
-
-  document.getElementById("name").value = "";
-  document.getElementById("fatherName").value = "";
-  document.getElementById("city").value = "";
-  document.getElementById("mobile").value = "";
-  document.getElementById("balance").value = "";
-
-  await showCustomers();
-  await updateDashboard();
-}
-
-async function showCustomers(){
-  let { data, error } = await db.from("customers").select("*").order("created_at", { ascending:false });
-
-  if(error){
-    alert("List Error: " + error.message);
-    return;
-  }
-
-  let html = "";
-
-  if(!data || data.length === 0){
-    html = "<div class='card'>No Customers Found</div>";
-  }else{
-    data.forEach(c=>{
-      html += `
-      <div class="card">
-        <b>Name:</b> ${c.Name || ""}<br>
-        <b>Father:</b> ${c.father_name || ""}<br>
-        <b>City:</b> ${c.city || ""}<br>
-        <b>Mobile:</b> ${c.mobile || "No Mobile"}<br>
-        <b>Balance:</b> ${formatMoney(c.balance)}
-      </div>
-      `;
-    });
-  }
-
-  document.getElementById("customerList").innerHTML = html;
-}
-
-async function findCustomerByInput(input){
   let { data, error } = await db.from("customers").select("*");
-
   if(error || !data) return null;
 
-  input = input.trim().toLowerCase();
-
   return data.find(c =>
-    (c.mobile || "").toLowerCase() === input ||
-    (c.Name || "").toLowerCase() === input
+    String(c.mobile || "").toLowerCase() === input ||
+    String(c.Name || "").toLowerCase() === input
   );
 }
 
-async function searchCustomer(){
-  let searchText = document.getElementById("searchText").value.trim();
-
-  if(searchText === ""){
-    alert("Name या Mobile डालो");
-    return;
-  }
-
-  let customer = await findCustomerByInput(searchText);
-
-  if(!customer){
-    document.getElementById("searchResult").innerHTML = "Customer Not Found";
-    return;
-  }
-
-  document.getElementById("searchResult").innerHTML = `
-  <div class="card">
-    <b>Customer Found</b><br><br>
-    <b>Name:</b> ${customer.Name || ""}<br>
-    <b>Father:</b> ${customer.father_name || ""}<br>
-    <b>City:</b> ${customer.city || ""}<br>
-    <b>Mobile:</b> ${customer.mobile || "No Mobile"}<br>
-    <b>Balance:</b> ${formatMoney(customer.balance)}
-  </div>
-  `;
-}
-
-async function receivePayment(){
-  let input = document.getElementById("payMobile").value.trim();
-  let amount = Number(document.getElementById("payAmount").value);
-
-  if(input === "" || isNaN(amount)){
-    alert("Customer Name/Mobile और Amount भरो");
-    return;
-  }
-
-  let customer = await findCustomerByInput(input);
-
-  if(!customer){
-    alert("Customer Not Found");
-    return;
-  }
-
-  let newBalance = Number(customer.balance || 0) - amount;
-
-  let { error } = await db.from("customers")
-    .update({ balance: newBalance })
-    .eq("id", customer.id);
-
-  if(error){
-    alert("Payment Error: " + error.message);
-    return;
-  }
-
-  await addLedger(customer.Name || "", customer.mobile || "", "Payment Received", amount, newBalance);
-
-  alert("Payment Saved");
-
-  document.getElementById("payMobile").value = "";
-  document.getElementById("payAmount").value = "";
-
-  await showCustomers();
-  await updateDashboard();
-}
-
-function calculatePurchase(){
-  let weight = Number(document.getElementById("weight").value);
-  let rate = Number(document.getElementById("rate").value);
-  let makingPercent = Number(document.getElementById("making").value);
-
-  let goldValue = weight * rate;
-  let makingAmount = (goldValue * makingPercent) / 100;
-  let total = goldValue + makingAmount;
-
-  return { goldValue, makingAmount, total };
-}
-
-async function goldPurchase(){
-  let input = document.getElementById("purchaseMobile").value.trim();
-  let item = document.getElementById("itemName").value.trim();
-  let weight = Number(document.getElementById("weight").value);
-  let rate = Number(document.getElementById("rate").value);
-  let makingPercent = Number(document.getElementById("making").value);
-
-  if(input === "" || item === "" || isNaN(weight) || isNaN(rate) || isNaN(makingPercent)){
-    alert("Purchase fields पूरे भरो");
-    return;
-  }
-
-  let customer = await findCustomerByInput(input);
-
-  if(!customer){
-    alert("Customer Not Found");
-    return;
-  }
-
-  let calc = calculatePurchase();
-  let newBalance = Number(customer.balance || 0) + calc.total;
-
-  await db.from("customers")
-    .update({ balance: newBalance })
-    .eq("id", customer.id);
-
-  await db.from("purchases").insert([{
+async function addLedger(customer, type, amount, balance){
+  await db.from("ledger").insert([{
+    name: customer.Name || customer.name || "",
     mobile: customer.mobile || "",
-    item_name: item,
-    weight: weight,
-    gold_rate: rate,
-    making_percent: makingPercent,
-    total_amount: calc.total,
-    created_at: getISOTime()
+    type: type,
+    amount: Number(amount || 0),
+    balance: Number(balance || 0),
+    created_at: nowISO()
   }]);
-
-  await addLedger(customer.Name || "", customer.mobile || "", "Gold Purchase - " + item, calc.total, newBalance);
-
-  alert("Purchase Saved");
-
-  await showCustomers();
-  await updateDashboard();
-}
-
-async function generateBill(){
-  let input = document.getElementById("purchaseMobile").value.trim();
-  let item = document.getElementById("itemName").value.trim();
-  let weight = Number(document.getElementById("weight").value);
-  let rate = Number(document.getElementById("rate").value);
-  let makingPercent = Number(document.getElementById("making").value);
-
-  let customer = await findCustomerByInput(input);
-
-  if(!customer){
-    alert("Customer Not Found");
-    return;
-  }
-
-  let calc = calculatePurchase();
-
-  document.getElementById("billResult").innerHTML = `
-  <div class="card">
-    <h2>NAND JEWELERS</h2>
-    <b>Date:</b> ${new Date().toLocaleString("en-IN")}<br>
-    <b>Customer:</b> ${customer.Name || ""}<br>
-    <b>Father:</b> ${customer.father_name || ""}<br>
-    <b>City:</b> ${customer.city || ""}<br>
-    <b>Mobile:</b> ${customer.mobile || "No Mobile"}<hr>
-    <b>Item:</b> ${item}<br>
-    <b>Weight:</b> ${weight} gm<br>
-    <b>Gold Rate:</b> ${formatMoney(rate)}<br>
-    <b>Making:</b> ${makingPercent}%<br>
-    <hr>
-    <h3>Total Bill: ${formatMoney(calc.total)}</h3>
-  </div>
-  `;
-}
-
-async function addExpense(){
-  let category = document.getElementById("expenseCategory").value;
-  let description = document.getElementById("expenseDescription").value.trim();
-  let amount = Number(document.getElementById("expenseAmount").value);
-
-  if(isNaN(amount) || amount <= 0){
-    alert("Expense amount भरो");
-    return;
-  }
-
-  let { error } = await db.from("expenses").insert([{
-    category: category,
-    description: description,
-    amount: amount,
-    created_at: getISOTime()
-  }]);
-
-  if(error){
-    alert("Expense Error: " + error.message);
-    return;
-  }
-
-  alert("Expense Saved");
-
-  document.getElementById("expenseDescription").value = "";
-  document.getElementById("expenseAmount").value = "";
-
-  await updateDashboard();
-}
-
-async function showStatement(){
-  let input = document.getElementById("statementMobile").value.trim();
-
-  let customer = await findCustomerByInput(input);
-
-  if(!customer){
-    document.getElementById("statementResult").innerHTML = "Customer Not Found";
-    return;
-  }
-
-  let { data, error } = await db.from("ledger")
-    .select("*")
-    .or(`mobile.eq.${customer.mobile},name.eq.${customer.Name}`)
-    .order("created_at", { ascending:true });
-
-  if(error || !data || data.length === 0){
-    document.getElementById("statementResult").innerHTML = "No Statement Found";
-    return;
-  }
-
-  let html = `
-  <div class="card">
-    <h3>Statement</h3>
-    <b>Name:</b> ${customer.Name || ""}<br>
-    <b>Father:</b> ${customer.father_name || ""}<br>
-    <b>City:</b> ${customer.city || ""}<br>
-    <b>Mobile:</b> ${customer.mobile || "No Mobile"}<br>
-    <b>Current Balance:</b> ${formatMoney(customer.balance)}
-  </div>
-  `;
-
-  data.forEach(e=>{
-    html += `
-    <div class="card">
-      <b>Date & Time:</b> ${formatDate(e.created_at)}<br>
-      <b>Particular:</b> ${e.type || ""}<br>
-      <b>Amount:</b> ${formatMoney(e.amount)}<br>
-      <b>Balance:</b> ${formatMoney(e.balance)}
-    </div>
-    `;
-  });
-
-  document.getElementById("statementResult").innerHTML = html;
 }
 
 async function updateDashboard(){
@@ -346,31 +48,372 @@ async function updateDashboard(){
   let totalCustomers = (customers || []).length;
   let pending = 0;
   let advance = 0;
-  let totalPayments = 0;
-  let totalExpenses = 0;
+  let payments = 0;
+  let expenseTotal = 0;
 
   (customers || []).forEach(c=>{
-    let bal = Number(c.balance || 0);
-    if(bal > 0) pending += bal;
-    if(bal < 0) advance += Math.abs(bal);
+    let b = Number(c.balance || 0);
+    if(b > 0) pending += b;
+    if(b < 0) advance += Math.abs(b);
   });
 
   (ledger || []).forEach(l=>{
-    if(l.type === "Payment Received"){
-      totalPayments += Number(l.amount || 0);
+    if((l.type || "").includes("Payment") || (l.type || "").includes("Deposit")){
+      payments += Number(l.amount || 0);
     }
   });
 
   (expenses || []).forEach(e=>{
-    totalExpenses += Number(e.amount || 0);
+    expenseTotal += Number(e.amount || 0);
   });
 
-  let cashInHand = totalPayments - totalExpenses;
-
   document.getElementById("totalCustomers").innerText = totalCustomers;
-  document.getElementById("pendingAmount").innerText = formatMoney(pending);
-  document.getElementById("advanceAmount").innerText = formatMoney(advance);
-  document.getElementById("cashInHand").innerText = formatMoney(cashInHand);
+  document.getElementById("pendingAmount").innerText = money(pending);
+  document.getElementById("advanceAmount").innerText = money(advance);
+  document.getElementById("cashInHand").innerText = money(payments - expenseTotal);
+  document.getElementById("totalExpense").innerText = money(expenseTotal);
+}
+
+async function addCustomer(){
+  let name = document.getElementById("name").value.trim();
+  let father = document.getElementById("fatherName").value.trim();
+  let city = document.getElementById("city").value.trim();
+  let mobile = document.getElementById("mobile").value.trim();
+  let balance = Number(document.getElementById("balance").value);
+
+  if(!name || isNaN(balance)){
+    alert("Name और Opening Balance जरूरी है");
+    return;
+  }
+
+  let { error } = await db.from("customers").insert([{
+    Name: name,
+    father_name: father,
+    city: city,
+    mobile: mobile,
+    balance: balance,
+    created_at: nowISO()
+  }]);
+
+  if(error){
+    alert("Customer Error: " + error.message);
+    return;
+  }
+
+  await addLedger({Name:name,mobile:mobile},"Opening Balance",balance,balance);
+
+  alert("Customer Saved");
+  document.getElementById("name").value="";
+  document.getElementById("fatherName").value="";
+  document.getElementById("city").value="";
+  document.getElementById("mobile").value="";
+  document.getElementById("balance").value="";
+
+  showCustomers();
+  updateDashboard();
+}
+
+async function showCustomers(){
+  let { data, error } = await db.from("customers").select("*").order("created_at",{ascending:false});
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  let html = "";
+  (data || []).forEach(c=>{
+    html += `
+    <div class="card">
+      <b>${c.Name || ""}</b><br>
+      Father: ${c.father_name || ""}<br>
+      City: ${c.city || ""}<br>
+      Mobile: ${c.mobile || "No Mobile"}<br>
+      Balance: ${money(c.balance)}
+    </div>`;
+  });
+
+  document.getElementById("customerList").innerHTML = html || "No Customers Found";
+}
+
+async function searchCustomer(){
+  let input = document.getElementById("searchText").value;
+  let c = await findCustomer(input);
+
+  if(!c){
+    document.getElementById("searchResult").innerHTML = "Customer Not Found";
+    return;
+  }
+
+  document.getElementById("searchResult").innerHTML = `
+  <div class="card">
+    <b>Name:</b> ${c.Name}<br>
+    <b>Father:</b> ${c.father_name || ""}<br>
+    <b>City:</b> ${c.city || ""}<br>
+    <b>Mobile:</b> ${c.mobile || "No Mobile"}<br>
+    <b>Balance:</b> ${money(c.balance)}
+  </div>`;
+}
+
+async function receivePayment(){
+  let input = document.getElementById("payCustomer").value;
+  let amount = Number(document.getElementById("payAmount").value);
+  let c = await findCustomer(input);
+
+  if(!c || isNaN(amount)){
+    alert("Customer या Amount गलत है");
+    return;
+  }
+
+  let newBalance = Number(c.balance || 0) - amount;
+
+  await db.from("customers").update({balance:newBalance}).eq("id",c.id);
+  await addLedger(c,"Payment Received",amount,newBalance);
+
+  alert("Payment Saved");
+  document.getElementById("payCustomer").value="";
+  document.getElementById("payAmount").value="";
+  showCustomers();
+  updateDashboard();
+}
+
+async function saveDeposit(){
+  let input = document.getElementById("depositCustomer").value;
+  let type = document.getElementById("depositType").value;
+  let weight = Number(document.getElementById("depositWeight").value || 0);
+  let purity = document.getElementById("depositPurity").value;
+  let value = Number(document.getElementById("depositValue").value);
+  let note = document.getElementById("depositNote").value;
+
+  let c = await findCustomer(input);
+
+  if(!c || isNaN(value)){
+    alert("Customer या Value गलत है");
+    return;
+  }
+
+  let newBalance = Number(c.balance || 0) - value;
+
+  await db.from("deposits").insert([{
+    name: c.Name,
+    mobile: c.mobile || "",
+    deposit_type: type,
+    weight: weight,
+    purity: purity,
+    value: value,
+    note: note,
+    created_at: nowISO()
+  }]);
+
+  await db.from("customers").update({balance:newBalance}).eq("id",c.id);
+
+  let ledgerType = `${type} | Weight: ${weight || "-"} | Purity: ${purity || "-"} | Note: ${note || "-"}`;
+  await addLedger(c,ledgerType,value,newBalance);
+
+  alert("Deposit Saved");
+  document.getElementById("depositCustomer").value="";
+  document.getElementById("depositWeight").value="";
+  document.getElementById("depositPurity").value="";
+  document.getElementById("depositValue").value="";
+  document.getElementById("depositNote").value="";
+  showCustomers();
+  updateDashboard();
+}
+
+function calcPurchase(){
+  let w = Number(document.getElementById("weight").value);
+  let r = Number(document.getElementById("rate").value);
+  let m = Number(document.getElementById("making").value);
+  let goldValue = w * r;
+  let total = goldValue + (goldValue * m / 100);
+  return {goldValue,total};
+}
+
+async function goldPurchase(){
+  let input = document.getElementById("purchaseCustomer").value;
+  let item = document.getElementById("itemName").value;
+  let weight = Number(document.getElementById("weight").value);
+  let rate = Number(document.getElementById("rate").value);
+  let making = Number(document.getElementById("making").value);
+
+  let c = await findCustomer(input);
+
+  if(!c || !item || isNaN(weight) || isNaN(rate) || isNaN(making)){
+    alert("Purchase details गलत हैं");
+    return;
+  }
+
+  let calc = calcPurchase();
+  let newBalance = Number(c.balance || 0) + calc.total;
+
+  await db.from("purchases").insert([{
+    mobile: c.mobile || "",
+    item_name: item,
+    weight: weight,
+    gold_rate: rate,
+    making_percent: making,
+    total_amount: calc.total,
+    created_at: nowISO()
+  }]);
+
+  await db.from("customers").update({balance:newBalance}).eq("id",c.id);
+  await addLedger(c,"Gold Purchase - " + item,calc.total,newBalance);
+
+  alert("Purchase Saved");
+  showCustomers();
+  updateDashboard();
+}
+
+async function generateBill(){
+  let input = document.getElementById("purchaseCustomer").value;
+  let item = document.getElementById("itemName").value;
+  let weight = Number(document.getElementById("weight").value);
+  let rate = Number(document.getElementById("rate").value);
+  let making = Number(document.getElementById("making").value);
+  let c = await findCustomer(input);
+
+  if(!c){
+    alert("Customer Not Found");
+    return;
+  }
+
+  let calc = calcPurchase();
+
+  document.getElementById("billResult").innerHTML = `
+  <div class="bill">
+    <h2>NAND JEWELERS</h2>
+    Date: ${new Date().toLocaleString("en-IN")}<br>
+    Customer: ${c.Name}<br>
+    Father: ${c.father_name || ""}<br>
+    City: ${c.city || ""}<br>
+    Mobile: ${c.mobile || "No Mobile"}<hr>
+    Item: ${item}<br>
+    Weight: ${weight} gm<br>
+    Rate: ${money(rate)}<br>
+    Making: ${making}%<hr>
+    <h3>Total: ${money(calc.total)}</h3>
+  </div>`;
+}
+
+async function addExpense(){
+  let category = document.getElementById("expenseCategory").value;
+  let description = document.getElementById("expenseDescription").value;
+  let amount = Number(document.getElementById("expenseAmount").value);
+
+  if(isNaN(amount)){
+    alert("Amount गलत है");
+    return;
+  }
+
+  let { error } = await db.from("expenses").insert([{
+    category:category,
+    description:description,
+    amount:amount,
+    created_at:nowISO()
+  }]);
+
+  if(error){
+    alert("Expense Error: " + error.message);
+    return;
+  }
+
+  alert("Expense Saved");
+  document.getElementById("expenseDescription").value="";
+  document.getElementById("expenseAmount").value="";
+  updateDashboard();
+}
+
+async function showStatement(){
+  let input = document.getElementById("statementCustomer").value;
+  let c = await findCustomer(input);
+
+  if(!c){
+    document.getElementById("statementResult").innerHTML = "Customer Not Found";
+    return;
+  }
+
+  let { data } = await db.from("ledger").select("*")
+    .or(`mobile.eq.${c.mobile},name.eq.${c.Name}`)
+    .order("created_at",{ascending:true});
+
+  let html = `
+  <div class="card">
+    <h3>Statement</h3>
+    Name: ${c.Name}<br>
+    Father: ${c.father_name || ""}<br>
+    City: ${c.city || ""}<br>
+    Mobile: ${c.mobile || "No Mobile"}<br>
+    Current Balance: ${money(c.balance)}
+  </div>`;
+
+  (data || []).forEach(e=>{
+    html += `
+    <div class="card">
+      <b>Date & Time:</b> ${dateTime(e.created_at)}<br>
+      <b>Particular:</b> ${e.type}<br>
+      <b>Amount:</b> ${money(e.amount)}<br>
+      <b>Balance:</b> ${money(e.balance)}
+    </div>`;
+  });
+
+  document.getElementById("statementResult").innerHTML = html;
+}
+
+async function pendingReport(){
+  let { data } = await db.from("customers").select("*");
+  let html = "<h3>Pending Customers</h3>";
+  let total = 0;
+
+  (data || []).forEach(c=>{
+    let b = Number(c.balance || 0);
+    if(b > 0){
+      total += b;
+      html += `<div class="card">${c.Name} | ${c.mobile || "No Mobile"} | Pending: ${money(b)}</div>`;
+    }
+  });
+
+  html += `<div class="card"><b>Total Pending: ${money(total)}</b></div>`;
+  document.getElementById("pendingReport").innerHTML = html;
+}
+
+async function advanceReport(){
+  let { data } = await db.from("customers").select("*");
+  let html = "<h3>Advance Customers</h3>";
+  let total = 0;
+
+  (data || []).forEach(c=>{
+    let b = Number(c.balance || 0);
+    if(b < 0){
+      total += Math.abs(b);
+      html += `<div class="card">${c.Name} | ${c.mobile || "No Mobile"} | Advance: ${money(Math.abs(b))}</div>`;
+    }
+  });
+
+  html += `<div class="card"><b>Total Advance: ${money(total)}</b></div>`;
+  document.getElementById("advanceReport").innerHTML = html;
+}
+
+async function cashBook(){
+  let { data: ledger } = await db.from("ledger").select("*");
+  let { data: expenses } = await db.from("expenses").select("*");
+
+  let income = 0, expense = 0;
+  let html = "<h3>Cash Book</h3>";
+
+  (ledger || []).forEach(l=>{
+    if((l.type || "").includes("Payment") || (l.type || "").includes("Deposit")){
+      income += Number(l.amount || 0);
+      html += `<div class="card">IN | ${dateTime(l.created_at)} | ${l.type} | ${money(l.amount)}</div>`;
+    }
+  });
+
+  (expenses || []).forEach(e=>{
+    expense += Number(e.amount || 0);
+    html += `<div class="card">OUT | ${dateTime(e.created_at)} | ${e.category} | ${e.description || ""} | ${money(e.amount)}</div>`;
+  });
+
+  html += `<div class="card"><b>Cash In Hand: ${money(income - expense)}</b></div>`;
+  document.getElementById("cashBookResult").innerHTML = html;
 }
 
 showCustomers();
