@@ -1400,3 +1400,73 @@ async function topCustomers(){
 
 window.businessSummary = businessSummary;
 window.topCustomers = topCustomers;
+
+async function loginUser(){
+
+  let username =
+    document.getElementById("loginUsername").value;
+
+  let password =
+    document.getElementById("loginPassword").value;
+
+  let { data, error } = await db
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .eq("password", password);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  if(!data || data.length === 0){
+
+    document.getElementById("loginResult").innerHTML =
+    "Invalid Login";
+
+    return;
+  }
+
+  localStorage.setItem(
+    "nand_login",
+    "yes"
+  );
+
+  document.getElementById("loginScreen").style.display =
+  "none";
+
+  document.getElementById("mainApp").style.display =
+  "block";
+
+  alert("Login Success");
+}
+
+function checkLogin(){
+
+  let logged =
+    localStorage.getItem("nand_login");
+
+  if(logged === "yes"){
+
+    document.getElementById("loginScreen").style.display =
+    "none";
+
+    document.getElementById("mainApp").style.display =
+    "block";
+
+  }else{
+
+    document.getElementById("loginScreen").style.display =
+    "block";
+
+    document.getElementById("mainApp").style.display =
+    "none";
+  }
+}
+
+window.loginUser = loginUser;
+
+setTimeout(()=>{
+  checkLogin();
+},500);
