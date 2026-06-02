@@ -1,4 +1,4 @@
-
+alert("APP V4 LOADED");
 const SUPABASE_URL = "https://ifmbflibzbocrfmqwgyd.supabase.co";
 const SUPABASE_KEY = "sb_publishable_daYW6h5n22EnWXRKqeKQbQ_LYH-NkrB";
 
