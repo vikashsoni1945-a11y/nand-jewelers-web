@@ -1014,3 +1014,10 @@ async function dailyClosing(){
 
   alert("Daily Closing Report Ready");
 }
+window.loadCustomerForEdit = loadCustomerForEdit;
+window.updateCustomer = updateCustomer;
+window.deleteCustomer = deleteCustomer;
+window.downloadStatementPDF = downloadStatementPDF;
+window.downloadPendingPDF = downloadPendingPDF;
+window.downloadAdvancePDF = downloadAdvancePDF;
+window.dailyClosing = dailyClosing;
