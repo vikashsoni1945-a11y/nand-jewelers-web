@@ -1308,7 +1308,6 @@ function shareStatementWhatsApp(){
 
 window.downloadBillPDF = downloadBillPDF;
 window.shareStatementWhatsApp = shareStatementWhatsApp;
-alert("PART 4 LOADED");
 
 window.downloadBillPDF = downloadBillPDF;
 window.shareStatementWhatsApp = shareStatementWhatsApp;
