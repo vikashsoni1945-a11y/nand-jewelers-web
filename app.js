@@ -1100,3 +1100,5 @@ async function showCustomerNotes(){
 
 window.addCustomerNote = addCustomerNote;
 window.showCustomerNotes = showCustomerNotes;
+window.addCustomerNote = addCustomerNote;
+window.showCustomerNotes = showCustomerNotes;
