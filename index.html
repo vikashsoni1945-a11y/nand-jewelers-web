@@ -21,6 +21,17 @@ h1,h2{text-align:center}
 </head>
 
 <body>
+
+<div id="loginScreen" class="card">
+<h2>🔐 Nand Jewelers Login</h2>
+<input id="loginUsername" placeholder="Username">
+<input id="loginPassword" type="password" placeholder="Password">
+<button onclick="loginUser()">Login</button>
+<div id="loginResult"></div>
+</div>
+
+<div id="mainApp" style="display:none;">
+
 <div class="container">
 
 <h1>💎 NAND JEWELERS</h1>
@@ -55,17 +66,14 @@ h1,h2{text-align:center}
 <h2>Edit / Delete Customer</h2>
 <input id="editCustomerSearch" placeholder="Customer Name or Mobile">
 <button onclick="loadCustomerForEdit()">Load Customer</button>
-
 <input id="editName" placeholder="New Name">
 <input id="editFather" placeholder="New Father Name">
 <input id="editCity" placeholder="New City">
 <input id="editMobile" placeholder="New Mobile">
 <input id="editBalance" placeholder="New Balance">
 <textarea id="editNotes" placeholder="Customer Notes"></textarea>
-
 <button onclick="updateCustomer()">Update Customer</button>
 <button onclick="deleteCustomer()">Delete Customer</button>
-
 <div id="editResult"></div>
 </div>
 
@@ -143,24 +151,26 @@ h1,h2{text-align:center}
 
 <div class="card">
 <h2>Reports</h2>
-
 <button onclick="pendingReport()">Pending Customers Report</button>
 <div id="pendingReport"></div>
-
 <button onclick="advanceReport()">Advance Customers Report</button>
 <div id="advanceReport"></div>
-
 <button onclick="downloadPendingPDF()">Download Pending PDF</button>
 <button onclick="downloadAdvancePDF()">Download Advance PDF</button>
-
 <button onclick="cashBook()">Cash Book</button>
 <div id="cashBookResult"></div>
-
 <button onclick="dailyClosing()">Daily Closing Report</button>
 <div id="dailyClosingResult"></div>
-
 <button onclick="monthlyReport()">Monthly Report</button>
 <div id="monthlyReportResult"></div>
+</div>
+
+<div class="card">
+<h2>Business Analytics</h2>
+<button onclick="businessSummary()">Business Summary</button>
+<div id="businessSummaryResult"></div>
+<button onclick="topCustomers()">Top Pending Customers</button>
+<div id="topCustomersResult"></div>
 </div>
 
 <div class="card">
@@ -170,23 +180,8 @@ h1,h2{text-align:center}
 </div>
 
 </div>
+</div>
 
 <script src="app.js"></script>
 </body>
 </html>
-<div class="card">
-<h2>Business Analytics</h2>
-
-<button onclick="businessSummary()">
-Business Summary
-</button>
-
-<div id="businessSummaryResult"></div>
-
-<button onclick="topCustomers()">
-Top Pending Customers
-</button>
-
-<div id="topCustomersResult"></div>
-
-</div>
