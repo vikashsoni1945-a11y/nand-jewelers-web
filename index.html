@@ -1,70 +1,131 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nand Jewelers</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nand Jewelers</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+body{
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+margin:0;
+padding:10px;
+}
 
-<div class="container">
+.container{
+max-width:1200px;
+margin:auto;
+}
 
-<h1>Nand Jewelers</h1>
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,.15);
+}
 
-<h2>Add Customer</h2>
-<input id="name" placeholder="Customer Name">
-<input id="mobile" placeholder="Mobile Number">
-<input id="balance" placeholder="Opening Balance">
-<button onclick="addCustomer()">Add Customer</button>
+input,select{
+width:100%;
+padding:10px;
+margin:5px 0;
+box-sizing:border-box;
+}
 
-<hr>
+button{
+width:100%;
+padding:12px;
+background:#c89b3c;
+color:white;
+border:none;
+border-radius:6px;
+margin-top:5px;
+font-weight:bold;
+}
 
-<h2>Receive Payment</h2>
-<input id="payMobile" placeholder="Customer Mobile">
-<input id="payAmount" placeholder="Payment Amount">
-<button onclick="receivePayment()">Receive Payment</button>
+h1,h2{
+text-align:center;
+}
 
-<hr>
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:10px;
+}
 
-<h2>Gold Purchase / Bill Generate</h2>
-<input id="purchaseMobile" placeholder="Customer Mobile">
-<input id="itemName" placeholder="Item Name">
-<input id="weight" placeholder="Weight in Gram">
-<input id="rate" placeholder="Gold Rate Per Gram">
-<input id="making" placeholder="Making Charge %">
-<button onclick="goldPurchase()">Save Purchase</button>
-<button onclick="generateBill()">Generate Bill</button>
-<div id="billResult"></div>
+.stat{
+background:white;
+padding:15px;
+border-radius:10px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+}
+</style></head><body><div class="container"><h1>💎 NAND JEWELERS</h1><div class="dashboard"><div class="stat">
+Total Customers
+<div id="totalCustomers">0</div>
+</div><div class="stat">
+Pending Amount
+<div id="pendingAmount">₹0</div>
+</div><div class="stat">
+Advance Amount
+<div id="advanceAmount">₹0</div>
+</div><div class="stat">
+Cash In Hand
+<div id="cashInHand">₹0</div>
+</div></div><div class="card"><h2>Add Customer</h2><input id="name" placeholder="Customer Name"><input id="fatherName" placeholder="Father Name"><input id="city" placeholder="City"><input id="mobile" placeholder="Mobile (Optional)"><input id="balance" placeholder="Opening Balance"><button onclick="addCustomer()">Add Customer</button>
 
-<hr>
+</div><div class="card"><h2>Search Customer</h2><input id="searchText"
+placeholder="Name or Mobile">
 
-<h2>Search Customer</h2>
-<input id="searchMobile" placeholder="Mobile Number">
-<button onclick="searchCustomer()">Search</button>
-<div id="searchResult"></div>
+<button onclick="searchCustomer()">
+Search
+</button><div id="searchResult"></div></div><div class="card"><h2>Receive Payment</h2><input id="payMobile"
+placeholder="Customer Mobile">
 
-<hr>
+<input id="payAmount"
+placeholder="Amount">
 
-<h2>Customer Statement</h2>
-<input id="statementMobile" placeholder="Customer Mobile">
-<button onclick="showStatement()">View Statement</button>
-<div id="statementResult"></div>
+<button onclick="receivePayment()">
+Receive Payment
+</button></div><div class="card"><h2>Gold Purchase</h2><input id="purchaseMobile"
+placeholder="Customer Mobile">
 
-<hr>
+<input id="itemName"
+placeholder="Item Name">
 
-<h2>Daily Sales Report</h2>
-<button onclick="dailySalesReport()">Show Today Report</button>
-<div id="dailyReport"></div>
+<input id="weight"
+placeholder="Weight">
 
-<hr>
+<input id="rate"
+placeholder="Gold Rate">
 
-<h2>Customer List</h2>
-<button onclick="showCustomers()">Refresh List</button>
-<div id="customerList"></div>
+<input id="making"
+placeholder="Making %">
 
-</div>
+<button onclick="goldPurchase()">
+Save Purchase
+</button><button onclick="generateBill()">
+Generate Bill
+</button><div id="billResult"></div></div><div class="card"><h2>Expense Entry</h2><select id="expenseCategory">
+<option>Shop Expense</option>
+<option>Home Expense</option>
+<option>Salary</option>
+<option>Rent</option>
+<option>Electricity</option>
+<option>Other</option>
+</select><input id="expenseDescription"
+placeholder="Description">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
-</body>
+<input id="expenseAmount"
+placeholder="Amount">
+
+<button onclick="addExpense()">
+Save Expense
+</button></div><div class="card"><h2>Customer Statement</h2><input id="statementMobile"
+placeholder="Customer Mobile">
+
+<button onclick="showStatement()">
+View Statement
+</button><div id="statementResult"></div></div><div class="card"><h2>Customer List</h2><button onclick="showCustomers()">
+Refresh List
+</button><div id="customerList"></div></div></div><script src="app.js"></script></body>
 </html>
