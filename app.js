@@ -1262,3 +1262,5 @@ async function monthlyReport(){
 
 window.showExpenseHistory = showExpenseHistory;
 window.monthlyReport = monthlyReport;
+window.showExpenseHistory = showExpenseHistory;
+window.monthlyReport = monthlyReport;
