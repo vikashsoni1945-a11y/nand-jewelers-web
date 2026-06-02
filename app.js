@@ -1470,3 +1470,5 @@ window.loginUser = loginUser;
 setTimeout(()=>{
   checkLogin();
 },500);
+alert("LOGIN CODE LOADED");
+window.loginUser = loginUser;
