@@ -1,131 +1,125 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nand Jewelers</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f4f4;
-margin:0;
-padding:10px;
-}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nand Jewelers</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;background:#f4f4f4;margin:0;padding:10px}
+.container{max-width:1200px;margin:auto}
+.card{background:white;padding:15px;margin:10px 0;border-radius:10px;box-shadow:0 2px 5px #ccc}
+input,select{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
+button{width:100%;padding:12px;background:#8b0045;color:white;border:none;border-radius:6px;margin-top:6px;font-weight:bold}
+h1,h2{text-align:center}
+.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.stat{background:white;padding:15px;border-radius:10px;text-align:center;font-weight:bold}
+.bill{border:2px solid #8b0045;padding:15px;background:#fff}
+</style>
+</head>
+<body>
 
-.container{
-max-width:1200px;
-margin:auto;
-}
+<div class="container">
+<h1>💎 NAND JEWELERS</h1>
 
-.card{
-background:white;
-padding:15px;
-margin:10px 0;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,.15);
-}
+<div class="dashboard">
+<div class="stat">Total Customers<br><span id="totalCustomers">0</span></div>
+<div class="stat">Pending Amount<br><span id="pendingAmount">₹0</span></div>
+<div class="stat">Advance Amount<br><span id="advanceAmount">₹0</span></div>
+<div class="stat">Cash In Hand<br><span id="cashInHand">₹0</span></div>
+<div class="stat">Total Expense<br><span id="totalExpense">₹0</span></div>
+</div>
 
-input,select{
-width:100%;
-padding:10px;
-margin:5px 0;
-box-sizing:border-box;
-}
+<div class="card">
+<h2>Add Customer</h2>
+<input id="name" placeholder="Customer Name">
+<input id="fatherName" placeholder="Father Name">
+<input id="city" placeholder="City">
+<input id="mobile" placeholder="Mobile Optional">
+<input id="balance" placeholder="Opening Balance">
+<button onclick="addCustomer()">Save Customer</button>
+</div>
 
-button{
-width:100%;
-padding:12px;
-background:#c89b3c;
-color:white;
-border:none;
-border-radius:6px;
-margin-top:5px;
-font-weight:bold;
-}
+<div class="card">
+<h2>Search Customer</h2>
+<input id="searchText" placeholder="Name or Mobile">
+<button onclick="searchCustomer()">Search</button>
+<div id="searchResult"></div>
+</div>
 
-h1,h2{
-text-align:center;
-}
+<div class="card">
+<h2>Receive Payment</h2>
+<input id="payCustomer" placeholder="Customer Name or Mobile">
+<input id="payAmount" placeholder="Amount">
+<button onclick="receivePayment()">Receive Payment</button>
+</div>
 
-.dashboard{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:10px;
-}
+<div class="card">
+<h2>Old Gold / Silver Deposit</h2>
+<input id="depositCustomer" placeholder="Customer Name or Mobile">
+<select id="depositType">
+<option>Old Gold Deposit</option>
+<option>Old Silver Deposit</option>
+<option>Cash Deposit</option>
+</select>
+<input id="depositWeight" placeholder="Weight Optional">
+<input id="depositPurity" placeholder="Purity Optional">
+<input id="depositValue" placeholder="Manual Value Amount">
+<input id="depositNote" placeholder="Note">
+<button onclick="saveDeposit()">Save Deposit</button>
+</div>
 
-.stat{
-background:white;
-padding:15px;
-border-radius:10px;
-text-align:center;
-font-size:18px;
-font-weight:bold;
-}
-</style></head><body><div class="container"><h1>💎 NAND JEWELERS</h1><div class="dashboard"><div class="stat">
-Total Customers
-<div id="totalCustomers">0</div>
-</div><div class="stat">
-Pending Amount
-<div id="pendingAmount">₹0</div>
-</div><div class="stat">
-Advance Amount
-<div id="advanceAmount">₹0</div>
-</div><div class="stat">
-Cash In Hand
-<div id="cashInHand">₹0</div>
-</div></div><div class="card"><h2>Add Customer</h2><input id="name" placeholder="Customer Name"><input id="fatherName" placeholder="Father Name"><input id="city" placeholder="City"><input id="mobile" placeholder="Mobile (Optional)"><input id="balance" placeholder="Opening Balance"><button onclick="addCustomer()">Add Customer</button>
+<div class="card">
+<h2>Gold Purchase / Bill</h2>
+<input id="purchaseCustomer" placeholder="Customer Name or Mobile">
+<input id="itemName" placeholder="Item Name">
+<input id="weight" placeholder="Weight">
+<input id="rate" placeholder="Gold Rate">
+<input id="making" placeholder="Making %">
+<button onclick="goldPurchase()">Save Purchase</button>
+<button onclick="generateBill()">Generate Bill</button>
+<div id="billResult"></div>
+</div>
 
-</div><div class="card"><h2>Search Customer</h2><input id="searchText"
-placeholder="Name or Mobile">
-
-<button onclick="searchCustomer()">
-Search
-</button><div id="searchResult"></div></div><div class="card"><h2>Receive Payment</h2><input id="payMobile"
-placeholder="Customer Mobile">
-
-<input id="payAmount"
-placeholder="Amount">
-
-<button onclick="receivePayment()">
-Receive Payment
-</button></div><div class="card"><h2>Gold Purchase</h2><input id="purchaseMobile"
-placeholder="Customer Mobile">
-
-<input id="itemName"
-placeholder="Item Name">
-
-<input id="weight"
-placeholder="Weight">
-
-<input id="rate"
-placeholder="Gold Rate">
-
-<input id="making"
-placeholder="Making %">
-
-<button onclick="goldPurchase()">
-Save Purchase
-</button><button onclick="generateBill()">
-Generate Bill
-</button><div id="billResult"></div></div><div class="card"><h2>Expense Entry</h2><select id="expenseCategory">
+<div class="card">
+<h2>Expense Entry</h2>
+<select id="expenseCategory">
 <option>Shop Expense</option>
 <option>Home Expense</option>
 <option>Salary</option>
 <option>Rent</option>
 <option>Electricity</option>
 <option>Other</option>
-</select><input id="expenseDescription"
-placeholder="Description">
+</select>
+<input id="expenseDescription" placeholder="Description">
+<input id="expenseAmount" placeholder="Amount">
+<button onclick="addExpense()">Save Expense</button>
+</div>
 
-<input id="expenseAmount"
-placeholder="Amount">
+<div class="card">
+<h2>Customer Statement</h2>
+<input id="statementCustomer" placeholder="Customer Name or Mobile">
+<button onclick="showStatement()">View Statement</button>
+<div id="statementResult"></div>
+</div>
 
-<button onclick="addExpense()">
-Save Expense
-</button></div><div class="card"><h2>Customer Statement</h2><input id="statementMobile"
-placeholder="Customer Mobile">
+<div class="card">
+<h2>Reports</h2>
+<button onclick="pendingReport()">Pending Customers Report</button>
+<div id="pendingReport"></div>
+<button onclick="advanceReport()">Advance Customers Report</button>
+<div id="advanceReport"></div>
+<button onclick="cashBook()">Cash Book</button>
+<div id="cashBookResult"></div>
+</div>
 
-<button onclick="showStatement()">
-View Statement
-</button><div id="statementResult"></div></div><div class="card"><h2>Customer List</h2><button onclick="showCustomers()">
-Refresh List
-</button><div id="customerList"></div></div></div><script src="app.js"></script></body>
+<div class="card">
+<h2>Customer List</h2>
+<button onclick="showCustomers()">Refresh List</button>
+<div id="customerList"></div>
+</div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
 </html>
