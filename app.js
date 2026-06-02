@@ -1021,3 +1021,82 @@ window.downloadStatementPDF = downloadStatementPDF;
 window.downloadPendingPDF = downloadPendingPDF;
 window.downloadAdvancePDF = downloadAdvancePDF;
 window.dailyClosing = dailyClosing;
+
+async function addCustomerNote(){
+  let input = document.getElementById("noteCustomer").value;
+  let note = document.getElementById("noteText").value;
+
+  let c = await findCustomer(input);
+
+  if(!c || note.trim() === ""){
+    alert("Customer या Note खाली है");
+    return;
+  }
+
+  let { error } = await db.from("customer_notes").insert([{
+    name: c.Name || "",
+    mobile: c.mobile || "",
+    note: note,
+    created_at: nowISO()
+  }]);
+
+  if(error){
+    alert("Note Error: " + error.message);
+    return;
+  }
+
+  await db.from("customers")
+    .update({ notes: note })
+    .eq("id", c.id);
+
+  alert("Note Saved");
+
+  document.getElementById("noteText").value = "";
+
+  showCustomerNotes();
+}
+
+async function showCustomerNotes(){
+  let input = document.getElementById("noteCustomer").value;
+  let c = await findCustomer(input);
+
+  if(!c){
+    document.getElementById("noteResult").innerHTML =
+    "Customer Not Found";
+    return;
+  }
+
+  let { data, error } = await db
+    .from("customer_notes")
+    .select("*")
+    .or(`mobile.eq.${c.mobile},name.eq.${c.Name}`)
+    .order("created_at", {ascending:false});
+
+  if(error){
+    document.getElementById("noteResult").innerHTML =
+    "Note Error: " + error.message;
+    return;
+  }
+
+  let html = `
+  <div class="card">
+    <b>Customer:</b> ${c.Name || ""}<br>
+    <b>Mobile:</b> ${c.mobile || "No Mobile"}<br>
+    <b>Latest Note:</b> ${c.notes || ""}
+  </div>
+  `;
+
+  (data || []).forEach(n=>{
+    html += `
+    <div class="card">
+      <b>Date & Time:</b> ${dateTime(n.created_at)}<br>
+      <b>Note:</b> ${n.note || ""}
+    </div>
+    `;
+  });
+
+  document.getElementById("noteResult").innerHTML = html;
+}
+
+window.addCustomerNote = addCustomerNote;
+window.showCustomerNotes = showCustomerNotes;
