@@ -1311,3 +1311,92 @@ window.shareStatementWhatsApp = shareStatementWhatsApp;
 
 window.downloadBillPDF = downloadBillPDF;
 window.shareStatementWhatsApp = shareStatementWhatsApp;
+
+async function businessSummary(){
+
+  let { data: customers } = await db.from("customers").select("*");
+  let { data: purchases } = await db.from("purchases").select("*");
+  let { data: expenses } = await db.from("expenses").select("*");
+
+  let pending = 0;
+  let advance = 0;
+  let sales = 0;
+  let expense = 0;
+
+  (customers || []).forEach(c=>{
+    let bal = Number(c.balance || 0);
+
+    if(bal > 0){
+      pending += bal;
+    }
+
+    if(bal < 0){
+      advance += Math.abs(bal);
+    }
+  });
+
+  (purchases || []).forEach(p=>{
+    sales += Number(p.total_amount || 0);
+  });
+
+  (expenses || []).forEach(e=>{
+    expense += Number(e.amount || 0);
+  });
+
+  document.getElementById("businessSummaryResult").innerHTML = `
+  <div class="card">
+    <h3>Business Summary</h3>
+
+    Total Customers :
+    <b>${(customers || []).length}</b><br><br>
+
+    Total Sales :
+    <b>${money(sales)}</b><br><br>
+
+    Total Pending :
+    <b>${money(pending)}</b><br><br>
+
+    Total Advance :
+    <b>${money(advance)}</b><br><br>
+
+    Total Expense :
+    <b>${money(expense)}</b>
+
+  </div>
+  `;
+}
+
+async function topCustomers(){
+
+  let { data } = await db
+    .from("customers")
+    .select("*");
+
+  let list = (data || [])
+    .sort((a,b)=>
+      Number(b.balance || 0) -
+      Number(a.balance || 0)
+    )
+    .slice(0,10);
+
+  let html = `
+  <div class="card">
+  <h3>Top Pending Customers</h3>
+  `;
+
+  list.forEach(c=>{
+
+    html += `
+    ${c.Name || ""} -
+    ${money(c.balance)}
+    <br>
+    `;
+  });
+
+  html += `</div>`;
+
+  document.getElementById("topCustomersResult").innerHTML = html;
+}
+
+window.businessSummary = businessSummary;
+window.topCustomers = topCustomers;
