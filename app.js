@@ -166,6 +166,26 @@ document.getElementById(
   "todayDeposit"
 ).innerText =
 money(todayDeposit);
+let todayExpense = 0;
+
+let today4 = new Date().toDateString();
+
+(expenses || []).forEach(e=>{
+
+  let date = new Date(
+    e.created_at
+  ).toDateString();
+
+  if(date === today4){
+    todayExpense +=
+      Number(e.amount || 0);
+  }
+});
+
+document.getElementById(
+  "todayExpense"
+).innerText =
+money(todayExpense);
 }
 
 async function addCustomer(){
