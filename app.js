@@ -2249,23 +2249,14 @@ async function showCustomerProfile() {
   return;
  }   
 
-    html += `
-    <div class="bill">
-
-    <b>Date:</b>
-    ${dateTime(l.created_at)}<br>
-
-    <b>Type:</b>
-    ${l.type || ""}<br>
-
-    <b>Amount:</b>
-    ${money(l.amount || 0)}<br>
-
-    <b>Balance:</b>
-    ${money(l.balance || 0)}
-
-    </div>
-    `;
+   html += `
+<div class="card" style="padding:10px;border-left:4px solid #8b0045;">
+  <b>${dateTime(l.created_at)}</b><br>
+  ${l.type || ""}<br>
+  Amount: <b>${money(l.amount || 0)}</b> |
+  Balance: <b>${money(l.balance || 0)}</b>
+</div>
+`; 
   });
 
   document.getElementById(
