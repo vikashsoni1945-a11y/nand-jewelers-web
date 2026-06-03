@@ -1665,3 +1665,59 @@ async function dateWiseReport(){
 
 window.dateWiseReport = dateWiseReport;
 window.dateWiseReport = dateWiseReport;
+// ===== VERSION 6 PART 4 : RESTORE BACKUP SYSTEM =====
+
+async function restoreBackup(){
+
+  let fileInput = document.getElementById("restoreFile");
+
+  if(!fileInput.files || fileInput.files.length === 0){
+    alert("Backup file select karo");
+    return;
+  }
+
+  let confirmRestore = confirm(
+    "Restore karne se purana data duplicate ho sakta hai. Kya aap sure ho?"
+  );
+
+  if(!confirmRestore){
+    return;
+  }
+
+  let file = fileInput.files[0];
+
+  let text = await file.text();
+
+  let backup = JSON.parse(text);
+
+  if(backup.customers){
+    await db.from("customers").insert(backup.customers);
+  }
+
+  if(backup.ledger){
+    await db.from("ledger").insert(backup.ledger);
+  }
+
+  if(backup.expenses){
+    await db.from("expenses").insert(backup.expenses);
+  }
+
+  if(backup.deposits){
+    await db.from("deposits").insert(backup.deposits);
+  }
+
+  if(backup.purchases){
+    await db.from("purchases").insert(backup.purchases);
+  }
+
+  if(backup.notes){
+    await db.from("customer_notes").insert(backup.notes);
+  }
+
+  document.getElementById("restoreResult").innerHTML =
+    "✅ Backup Restored Successfully";
+
+  alert("Backup Restored");
+}
+
+window.restoreBackup = restoreBackup;
