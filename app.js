@@ -1820,13 +1820,22 @@ async function showStockReport(){
 window.saveStock = saveStock;
 window.showStockReport = showStockReport;
 function scrollToSection(id){
+
   let el = document.getElementById(id);
 
-  if(el){
-    el.scrollIntoView({
-      behavior:"smooth"
-    });
+  if(!el){
+    return;
   }
+
+  let y =
+    el.getBoundingClientRect().top +
+    window.pageYOffset -
+    70;
+
+  window.scrollTo({
+    top:y,
+    behavior:"smooth"
+  });
 }
 
 window.scrollToSection = scrollToSection;
