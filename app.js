@@ -2034,3 +2034,53 @@ async function showTopPendingCustomers() {
         "topPendingResult"
     ).innerHTML = html;
 }
+
+async function showTopPurchaseCustomers() {
+
+    let { data: purchases } =
+    await db.from("purchases").select("*");
+
+    let totals = {};
+
+    (purchases || []).forEach(p => {
+
+        let name =
+        p.customer_name || "Unknown";
+
+        let amount =
+        Number(
+        p.total_amount ||
+        p.total || 0
+        );
+
+        totals[name] =
+        (totals[name] || 0)
+        + amount;
+
+    });
+
+    let top =
+    Object.entries(totals)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5);
+
+    let html = "";
+
+    top.forEach((c,i)=>{
+
+        html += `
+        <div class="bill">
+        ${i+1}. ${c[0]}
+        <br>
+        Purchase:
+        ${money(c[1])}
+        </div>
+        `;
+
+    });
+
+    document.getElementById(
+    "topPurchaseResult"
+    ).innerHTML = html;
+
+}
