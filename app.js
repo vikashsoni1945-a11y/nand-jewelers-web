@@ -613,11 +613,10 @@ async function goldPurchase(){
   let calc = calcPurchase();
   let newBalance = Number(c.balance || 0) + calc.total;
 
-  let { error: purchaseError } = await db
-    .from("purchases")
-    .insert([{
-      mobile: c.mobile || "",
-      item_name: item,
+  let { error: purchaseError } = await db.from("purchases").insert([{
+  name: c.Name || "",
+  mobile: c.mobile || "",
+  item_name: item,
       weight: weight,
       gold_rate: rate,
       making_percent: making,
