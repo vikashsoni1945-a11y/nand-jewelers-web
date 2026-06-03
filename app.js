@@ -2037,7 +2037,6 @@ async function showTopPendingCustomers() {
 
 async function showTopPurchaseCustomers() {
   
-  alert("Top Purchase Clicked");
 
   let { data: purchases, error } =
   await db.from("purchases").select("*");
