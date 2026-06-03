@@ -1471,3 +1471,13 @@ setTimeout(()=>{
   checkLogin();
 },500);
 window.loginUser = loginUser;
+function logoutUser(){
+
+  localStorage.removeItem("nand_login");
+
+  alert("Logged Out");
+
+  location.reload();
+}
+
+window.logoutUser = logoutUser;
