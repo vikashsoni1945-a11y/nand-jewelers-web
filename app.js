@@ -186,6 +186,61 @@ document.getElementById(
   "todayExpense"
 ).innerText =
 money(todayExpense);
+// Profit Dashboard
+
+let totalSales = 0;
+
+(purchases || []).forEach(p=>{
+  totalSales += Number(p.total_amount || p.total || 0)
+});
+
+document.getElementById(
+  "totalSales"
+).innerText =
+money(totalSales);
+
+
+let monthlySales = 0;
+
+let currentMonth =
+new Date().getMonth();
+
+(purchases || []).forEach(p=>{
+
+  let d = new Date(
+    p.created_at
+  );
+
+  if(
+    d.getMonth() === currentMonth
+  ){
+    monthlySales +=
+      Number(p.total_amount || p.total || 0)
+  }
+});
+
+document.getElementById(
+  "monthlySales"
+).innerText =
+money(monthlySales);
+
+
+let todayProfit =
+todaySale - todayExpense;
+
+document.getElementById(
+  "todayProfit"
+).innerText =
+money(todayProfit);
+
+
+let monthlyProfit =
+monthlySales - totalExpense;
+
+document.getElementById(
+  "monthlyProfit"
+).innerText =
+money(monthlyProfit);
 }
 
 async function addCustomer(){
