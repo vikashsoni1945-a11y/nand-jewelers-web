@@ -118,6 +118,34 @@ document.getElementById(
   "todayCollection"
 ).innerText =
 money(todayCollection);
+let todaySale = 0;
+
+let today2 = new Date().toDateString();
+
+(ledger || []).forEach(l=>{
+
+  let type = l.type || "";
+
+  let date = new Date(
+    l.created_at
+  ).toDateString();
+
+  if(
+    date === today2 &&
+    (
+      type.includes("Purchase") ||
+      type.includes("Bill")
+    )
+  ){
+    todaySale +=
+      Number(l.amount || 0);
+  }
+});
+
+document.getElementById(
+  "todaySale"
+).innerText =
+money(todaySale);
 }
 
 async function addCustomer(){
