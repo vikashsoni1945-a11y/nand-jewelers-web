@@ -1536,3 +1536,131 @@ async function downloadBackup(){
 }
 
 window.downloadBackup = downloadBackup;
+
+async function dateWiseReport(){
+
+  let fromDate =
+    document.getElementById("fromDate").value;
+
+  let toDate =
+    document.getElementById("toDate").value;
+
+  if(!fromDate || !toDate){
+    alert("Select Date Range");
+    return;
+  }
+
+  let start =
+    new Date(fromDate).getTime();
+
+  let end =
+    new Date(toDate + "T23:59:59").getTime();
+
+  let { data: purchases } =
+    await db.from("purchases").select("*");
+
+  let { data: expenses } =
+    await db.from("expenses").select("*");
+
+  let { data: deposits } =
+    await db.from("deposits").select("*");
+
+  let { data: ledger } =
+    await db.from("ledger").select("*");
+
+  let sales = 0;
+  let collection = 0;
+  let depositValue = 0;
+  let expense = 0;
+
+  (purchases || []).forEach(p=>{
+
+    let d =
+      new Date(p.created_at).getTime();
+
+    if(d >= start && d <= end){
+
+      sales +=
+        Number(p.total_amount || 0);
+    }
+  });
+
+  (expenses || []).forEach(e=>{
+
+    let d =
+      new Date(e.created_at).getTime();
+
+    if(d >= start && d <= end){
+
+      expense +=
+        Number(e.amount || 0);
+    }
+  });
+
+  (deposits || []).forEach(d=>{
+
+    let t =
+      new Date(d.created_at).getTime();
+
+    if(t >= start && t <= end){
+
+      depositValue +=
+        Number(d.value || 0);
+    }
+  });
+
+  (ledger || []).forEach(l=>{
+
+    let t =
+      new Date(l.created_at).getTime();
+
+    if(
+      t >= start &&
+      t <= end &&
+      (l.type || "").includes("Payment")
+    ){
+
+      collection +=
+        Number(l.amount || 0);
+    }
+  });
+
+  let netCash =
+    collection +
+    depositValue -
+    expense;
+
+  document.getElementById(
+    "dateReportResult"
+  ).innerHTML = `
+
+  <div class="card">
+
+  <h3>Date Wise Report</h3>
+
+  From :
+  ${fromDate}<br><br>
+
+  To :
+  ${toDate}<br><br>
+
+  Total Sales :
+  <b>${money(sales)}</b><br><br>
+
+  Total Collection :
+  <b>${money(collection)}</b><br><br>
+
+  Total Deposits :
+  <b>${money(depositValue)}</b><br><br>
+
+  Total Expense :
+  <b>${money(expense)}</b><br><br>
+
+  Net Cash :
+  <b>${money(netCash)}</b>
+
+  </div>
+  `;
+}
+
+window.dateWiseReport = dateWiseReport;
