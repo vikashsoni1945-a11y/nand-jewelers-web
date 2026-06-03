@@ -1819,3 +1819,14 @@ async function showStockReport(){
 
 window.saveStock = saveStock;
 window.showStockReport = showStockReport;
+function scrollToSection(id){
+  let el = document.getElementById(id);
+
+  if(el){
+    el.scrollIntoView({
+      behavior:"smooth"
+    });
+  }
+}
+
+window.scrollToSection = scrollToSection;
