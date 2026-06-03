@@ -1721,3 +1721,101 @@ async function restoreBackup(){
 }
 
 window.restoreBackup = restoreBackup;
+
+async function saveStock(){
+
+  let metal = document.getElementById("stockMetal").value;
+  let type = document.getElementById("stockType").value;
+  let weight = Number(document.getElementById("stockWeight").value);
+  let note = document.getElementById("stockNote").value;
+
+  if(isNaN(weight) || weight <= 0){
+    alert("Weight सही भरो");
+    return;
+  }
+
+  let { error } = await db.from("stock").insert([{
+    metal: metal,
+    type: type,
+    weight: weight,
+    note: note,
+    created_at: new Date().toISOString()
+  }]);
+
+  if(error){
+    alert("Stock Error: " + error.message);
+    return;
+  }
+
+  alert("Stock Saved");
+
+  document.getElementById("stockWeight").value = "";
+  document.getElementById("stockNote").value = "";
+
+  showStockReport();
+}
+
+async function showStockReport(){
+
+  let { data, error } = await db
+    .from("stock")
+    .select("*")
+    .order("created_at", {ascending:false});
+
+  if(error){
+    document.getElementById("stockResult").innerHTML =
+      "Stock Error: " + error.message;
+    return;
+  }
+
+  let goldIn = 0;
+  let goldOut = 0;
+  let silverIn = 0;
+  let silverOut = 0;
+
+  let html = "<h3>Stock Report</h3>";
+
+  (data || []).forEach(s=>{
+
+    let w = Number(s.weight || 0);
+
+    if(s.metal === "Gold" && s.type === "Stock In"){
+      goldIn += w;
+    }
+
+    if(s.metal === "Gold" && s.type === "Stock Out"){
+      goldOut += w;
+    }
+
+    if(s.metal === "Silver" && s.type === "Stock In"){
+      silverIn += w;
+    }
+
+    if(s.metal === "Silver" && s.type === "Stock Out"){
+      silverOut += w;
+    }
+
+    html += `
+    <div class="card">
+      <b>Date:</b> ${dateTime(s.created_at)}<br>
+      <b>Metal:</b> ${s.metal}<br>
+      <b>Type:</b> ${s.type}<br>
+      <b>Weight:</b> ${s.weight} gm<br>
+      <b>Note:</b> ${s.note || ""}
+    </div>
+    `;
+  });
+
+  html = `
+  <div class="card">
+    <h3>Current Stock</h3>
+    <b>Gold Stock:</b> ${goldIn - goldOut} gm<br>
+    <b>Silver Stock:</b> ${silverIn - silverOut} gm
+  </div>
+  ` + html;
+
+  document.getElementById("stockResult").innerHTML = html;
+}
+
+window.saveStock = saveStock;
+window.showStockReport = showStockReport;
