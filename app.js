@@ -1484,3 +1484,55 @@ function logoutUser(){
 }
 
 window.logoutUser = logoutUser;
+
+async function downloadBackup(){
+
+  let { data: customers } =
+    await db.from("customers").select("*");
+
+  let { data: ledger } =
+    await db.from("ledger").select("*");
+
+  let { data: expenses } =
+    await db.from("expenses").select("*");
+
+  let { data: deposits } =
+    await db.from("deposits").select("*");
+
+  let { data: purchases } =
+    await db.from("purchases").select("*");
+
+  let { data: notes } =
+    await db.from("customer_notes").select("*");
+
+  let backup = {
+    backup_date: new Date().toLocaleString("en-IN"),
+    customers,
+    ledger,
+    expenses,
+    deposits,
+    purchases,
+    notes
+  };
+
+  let blob = new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:"application/json"}
+  );
+
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+
+  a.href = url;
+
+  a.download =
+    "nand-jewelers-backup.json";
+
+  a.click();
+
+  document.getElementById("backupResult").innerHTML =
+  "✅ Backup Downloaded";
+}
+
+window.downloadBackup = downloadBackup;
