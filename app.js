@@ -93,6 +93,31 @@ async function updateDashboard(){
   document.getElementById("advanceAmount").innerText = money(advance);
   document.getElementById("cashInHand").innerText = money(totalCollection - totalExpense);
   document.getElementById("totalExpense").innerText = money(totalExpense);
+let todayCollection = 0;
+
+let today = new Date().toDateString();
+
+(ledger || []).forEach(l=>{
+
+  let type = l.type || "";
+
+  let date = new Date(
+    l.created_at
+  ).toDateString();
+
+  if(
+    date === today &&
+    type.includes("Payment")
+  ){
+    todayCollection +=
+      Number(l.amount || 0);
+  }
+});
+
+document.getElementById(
+  "todayCollection"
+).innerText =
+money(todayCollection);
 }
 
 async function addCustomer(){
