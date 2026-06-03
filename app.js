@@ -1473,11 +1473,14 @@ setTimeout(()=>{
 window.loginUser = loginUser;
 function logoutUser(){
 
-  alert("Logout Button Clicked");
+  localStorage.clear();
 
-  localStorage.removeItem("nand_login");
+  sessionStorage.clear();
 
-  location.reload();
+  alert("Logged Out");
+
+  window.location.href =
+  "https://vikashsoni1945-a11y.github.io/nand-jewelers-web/?logout=1";
 }
 
 window.logoutUser = logoutUser;
