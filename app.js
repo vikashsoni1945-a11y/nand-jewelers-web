@@ -21,11 +21,12 @@ function dateTime(v){
   return new Date(v).toLocaleString("en-IN");
 }
 
-async function findCustomer(input){
+async function findCustomers(input){
+
   input = (input || "").trim().toLowerCase();
 
   if(!input){
-    return null;
+    return [];
   }
 
   let { data, error } = await db
@@ -33,15 +34,32 @@ async function findCustomer(input){
     .select("*");
 
   if(error || !data){
-    return null;
+    return [];
   }
 
-  return data.find(c =>
+  return data.filter(c =>
     String(c.mobile || "").toLowerCase() === input ||
-    String(c.Name || "").toLowerCase() === input
+    String(c.Name || "").toLowerCase().includes(input)
   );
 }
 
+async function findCustomer(input){
+
+  let list = await findCustomers(input);
+
+  if(list.length === 0){
+    return null;
+  }
+
+  if(list.length === 1){
+    return list[0];
+  }
+
+  return {
+    multiple:true,
+    list:list
+  };
+}
 async function addLedger(customer, type, amount, balance){
   await db.from("ledger").insert([{
     name: customer.Name || customer.name || "",
@@ -321,14 +339,64 @@ async function showCustomers(){
 }
 
 async function searchCustomer(){
-  let input = document.getElementById("searchText").value;
-  let c = await findCustomer(input);
+
+  let input =
+  document.getElementById("searchText").value;
+
+  let c =
+  await findCustomer(input);
 
   if(!c){
+
     document.getElementById("searchResult").innerHTML =
     "Customer Not Found";
+
     return;
   }
+
+  if(c.multiple){
+
+    let html =
+    "<h3>Select Customer</h3>";
+
+    c.list.forEach((x,i)=>{
+
+      html += `
+      <div class="bill">
+      <b>${x.Name || ""}</b><br>
+      Father: ${x.father_name || "-"}<br>
+      Mobile: ${x.mobile || "-"}<br>
+      Balance: ${money(x.balance || 0)}<br>
+
+      <button onclick="selectSearchCustomer(${i})">
+      Select This Customer
+      </button>
+      </div>
+      `;
+
+    });
+
+    window.tempSearchCustomers =
+    c.list;
+
+    document.getElementById("searchResult").innerHTML =
+    html;
+
+    return;
+  }
+
+  showSelectedSearchCustomer(c);
+}
+
+function selectSearchCustomer(index){
+
+  let c =
+  window.tempSearchCustomers[index];
+
+  showSelectedSearchCustomer(c);
+}
+
+function showSelectedSearchCustomer(c){
 
   document.getElementById("searchResult").innerHTML = `
   <div class="card">
@@ -340,6 +408,9 @@ async function searchCustomer(){
   </div>
   `;
 }
+
+window.searchCustomer = searchCustomer;
+window.selectSearchCustomer = selectSearchCustomer;
 
 async function loadCustomerForEdit(){
   let input = document.getElementById("editCustomerSearch").value;
