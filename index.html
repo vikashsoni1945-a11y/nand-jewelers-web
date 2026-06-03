@@ -157,6 +157,33 @@ margin:0;
 body{
 padding-bottom:80px;
 }  
+.header-card{
+background:linear-gradient(135deg,#8b0045,#c2185b);
+color:white;
+padding:20px;
+border-radius:18px;
+margin-bottom:15px;
+text-align:center;
+box-shadow:0 4px 15px rgba(0,0,0,0.15);
+}
+
+.header-card h1{
+color:white;
+margin:0;
+}
+
+.header-card p{
+margin:6px 0;
+}
+
+.logout-btn{
+width:auto !important;
+padding:8px 16px;
+margin-top:10px;
+background:white !important;
+color:#8b0045 !important;
+font-weight:bold;
+}  
 </style>
 </head>
 
@@ -174,11 +201,22 @@ padding-bottom:80px;
 
 <div class="container">
 
+<div class="header-card">
+
 <h1>💎 NAND JEWELERS</h1>
-  
-<button onclick="logoutUser()">
-Logout
+
+<p id="welcomeText">
+Welcome Vikash 👋
+</p>
+
+<p id="todayDate"></p>
+
+<button class="logout-btn"
+onclick="logoutUser()">
+🚪 Logout
 </button>
+
+</div>
 <div class="dashboard">
 <div class="stat">Total Customers<br><span id="totalCustomers">0</span></div>
 <div class="stat">Pending Amount<br><span id="pendingAmount">₹0</span></div>
