@@ -8,15 +8,86 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#f4f4f4;margin:0;padding:10px}
-.container{max-width:1200px;margin:auto}
-.card{background:white;padding:15px;margin:10px 0;border-radius:10px;box-shadow:0 2px 5px #ccc}
-input,select,textarea{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
-button{width:100%;padding:12px;background:#8b0045;color:white;border:none;border-radius:6px;margin-top:6px;font-weight:bold}
-h1,h2{text-align:center}
-.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.stat{background:white;padding:15px;border-radius:10px;text-align:center;font-weight:bold}
-.bill{border:2px solid #8b0045;padding:15px;background:#fff}
+body{
+font-family:Arial,sans-serif;
+background:#f3f4f6;
+margin:0;
+padding:12px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+background:#ffffff;
+padding:18px;
+margin:12px 0;
+border-radius:18px;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+}
+
+input,select,textarea{
+width:100%;
+padding:14px;
+margin:6px 0;
+border:1px solid #ddd;
+border-radius:12px;
+box-sizing:border-box;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:14px;
+background:#8b0045;
+color:white;
+border:none;
+border-radius:12px;
+font-size:16px;
+font-weight:bold;
+margin-top:8px;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+h1{
+text-align:center;
+color:#8b0045;
+font-size:32px;
+}
+
+h2{
+text-align:center;
+color:#222;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:12px;
+}
+
+.stat{
+background:linear-gradient(135deg,#8b0045,#c2185b);
+color:white;
+padding:18px;
+border-radius:15px;
+text-align:center;
+font-weight:bold;
+font-size:16px;
+}
+
+.bill{
+border:2px solid #8b0045;
+padding:15px;
+border-radius:12px;
+background:white;
+}
 </style>
 </head>
 
