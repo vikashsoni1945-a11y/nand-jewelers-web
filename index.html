@@ -206,6 +206,29 @@ Generate Date Report
 </div>
   
 <div class="card">
+<div class="card">
+<h2>Stock Register</h2>
+
+<select id="stockMetal">
+<option>Gold</option>
+<option>Silver</option>
+</select>
+
+<select id="stockType">
+<option>Stock In</option>
+<option>Stock Out</option>
+</select>
+
+<input id="stockWeight" placeholder="Weight in Gram">
+
+<input id="stockNote" placeholder="Note">
+
+<button onclick="saveStock()">Save Stock Entry</button>
+
+<button onclick="showStockReport()">Show Stock Report</button>
+
+<div id="stockResult"></div>
+</div>  
 <h2>Customer List</h2>
 <button onclick="showCustomers()">Refresh List</button>
 <div id="customerList"></div>
