@@ -1473,9 +1473,9 @@ setTimeout(()=>{
 window.loginUser = loginUser;
 function logoutUser(){
 
-  localStorage.removeItem("nand_login");
+  alert("Logout Button Clicked");
 
-  alert("Logged Out");
+  localStorage.removeItem("nand_login");
 
   location.reload();
 }
