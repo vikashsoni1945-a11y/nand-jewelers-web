@@ -2092,123 +2092,180 @@ window.showTopPurchaseCustomers = showTopPurchaseCustomers;
 
 async function showCustomerProfile() {
 
-  let search = document.getElementById("profileCustomer").value.trim();
+  let search =
+  document.getElementById("profileCustomer")
+  .value.trim();
 
   if(!search){
     alert("Enter Customer Name or Mobile");
     return;
   }
 
-  let { data: customers } = await db.from("customers").select("*");
-  let { data: ledger } = await db.from("ledger").select("*");
-  let { data: purchases } = await db.from("purchases").select("*");
-  let { data: deposits } = await db.from("deposits").select("*");
-  let { data: notes } = await db.from("customer_notes").select("*");
+  let { data: customers } =
+  await db.from("customers").select("*");
 
-  let customer = (customers || []).find(c =>
-    String(c.Name || c.name || "").toLowerCase().includes(search.toLowerCase()) ||
-    String(c.mobile || "").includes(search)
+  let { data: ledger } =
+  await db.from("ledger").select("*");
+
+  let customer =
+  (customers || []).find(c =>
+
+    String(c.Name || "")
+    .toLowerCase()
+    .includes(search.toLowerCase())
+
+    ||
+
+    String(c.mobile || "")
+    .includes(search)
+
   );
 
   if(!customer){
-    document.getElementById("profileResult").innerHTML = "Customer Not Found";
+
+    document.getElementById(
+      "profileResult"
+    ).innerHTML =
+    "Customer Not Found";
+
     return;
   }
 
-  let cname = customer.Name || customer.name || "";
-  let cmobile = customer.mobile || "";
+  let cname =
+  customer.Name || "";
+
+  let cmobile =
+  customer.mobile || "";
 
   let totalPurchase = 0;
   let totalPayment = 0;
   let totalDeposit = 0;
 
-  (purchases || []).forEach(p=>{
-    if(
-      String(p.mobile || "") === String(cmobile) ||
-      String(p.name || p.customer_name || "").toLowerCase() === cname.toLowerCase()
-    ){
-      totalPurchase += Number(p.total_amount || p.total || 0);
-    }
-  });
-
   (ledger || []).forEach(l=>{
-    if(
-      String(l.mobile || "") === String(cmobile) ||
-      String(l.name || "").toLowerCase() === cname.toLowerCase()
-    ){
-      if((l.type || "").includes("Payment")){
-        totalPayment += Number(l.amount || 0);
-      }
-    }
-  });
 
-  (deposits || []).forEach(d=>{
-    if(
-      String(d.mobile || "") === String(cmobile) ||
-      String(d.name || "").toLowerCase() === cname.toLowerCase()
-    ){
-      totalDeposit += Number(d.value || 0);
+    let match =
+
+      String(l.mobile || "")
+      === String(cmobile)
+
+      ||
+
+      String(l.name || "")
+      .toLowerCase()
+      === cname.toLowerCase();
+
+    if(!match){
+      return;
     }
+
+    let type =
+    String(l.type || "");
+
+    if(
+      type.includes("Purchase")
+    ){
+      totalPurchase +=
+      Number(l.amount || 0);
+    }
+
+    if(
+      type.includes("Payment")
+    ){
+      totalPayment +=
+      Number(l.amount || 0);
+    }
+
+    if(
+      type.includes("Deposit")
+    ){
+      totalDeposit +=
+      Number(l.amount || 0);
+    }
+
   });
 
   let html = `
   <div class="bill">
-    <h3>Customer Profile</h3>
-    <b>Name:</b> ${cname}<br>
-    <b>Father:</b> ${customer.father_name || "-"}<br>
-    <b>Mobile:</b> ${cmobile || "-"}<br>
-    <b>City:</b> ${customer.city || "-"}<br>
-    <b>Current Balance:</b> ${money(customer.balance || 0)}<br>
-    <hr>
-    <b>Total Purchase:</b> ${money(totalPurchase)}<br>
-    <b>Total Payment:</b> ${money(totalPayment)}<br>
-    <b>Total Deposit:</b> ${money(totalDeposit)}<br>
+
+  <h3>Customer Profile</h3>
+
+  <b>Name:</b>
+  ${cname}<br>
+
+  <b>Father:</b>
+  ${customer.father_name || "-"}<br>
+
+  <b>Mobile:</b>
+  ${cmobile || "-"}<br>
+
+  <b>City:</b>
+  ${customer.city || "-"}<br>
+
+  <b>Current Balance:</b>
+  ${money(customer.balance || 0)}<br><br>
+
+  <b>Total Purchase:</b>
+  ${money(totalPurchase)}<br>
+
+  <b>Total Payment:</b>
+  ${money(totalPayment)}<br>
+
+  <b>Total Deposit:</b>
+  ${money(totalDeposit)}<br>
+
   </div>
   `;
 
-  html += `<h3>Ledger History</h3>`;
+  html += `
+  <h3>Ledger History</h3>
+  `;
 
-  let customerLedger = (ledger || []).filter(l =>
-    String(l.mobile || "") === String(cmobile) ||
-    String(l.name || "").toLowerCase() === cname.toLowerCase()
+  let customerLedger =
+  (ledger || []).filter(l =>
+
+    String(l.mobile || "")
+    === String(cmobile)
+
+    ||
+
+    String(l.name || "")
+    .toLowerCase()
+    === cname.toLowerCase()
+
   );
 
-  if(customerLedger.length === 0){
-    html += `<div class="bill">No Ledger Found</div>`;
-  }
+  customerLedger
+  .sort((a,b)=>
+    new Date(b.created_at)
+    -
+    new Date(a.created_at)
+  );
 
   customerLedger.forEach(l=>{
+
     html += `
     <div class="bill">
-      <b>Date:</b> ${dateTime(l.created_at)}<br>
-      <b>Type:</b> ${l.type || ""}<br>
-      <b>Amount:</b> ${money(l.amount || 0)}<br>
-      <b>Balance:</b> ${money(l.balance || 0)}
+
+    <b>Date:</b>
+    ${dateTime(l.created_at)}<br>
+
+    <b>Type:</b>
+    ${l.type || ""}<br>
+
+    <b>Amount:</b>
+    ${money(l.amount || 0)}<br>
+
+    <b>Balance:</b>
+    ${money(l.balance || 0)}
+
     </div>
     `;
   });
 
-  html += `<h3>Notes</h3>`;
-
-  let customerNotes = (notes || []).filter(n =>
-    String(n.mobile || "") === String(cmobile) ||
-    String(n.name || "").toLowerCase() === cname.toLowerCase()
-  );
-
-  if(customerNotes.length === 0){
-    html += `<div class="bill">No Notes Found</div>`;
-  }
-
-  customerNotes.forEach(n=>{
-    html += `
-    <div class="bill">
-      <b>Date:</b> ${dateTime(n.created_at)}<br>
-      <b>Note:</b> ${n.note || ""}
-    </div>
-    `;
-  });
-
-  document.getElementById("profileResult").innerHTML = html;
+  document.getElementById(
+    "profileResult"
+  ).innerHTML = html;
 }
 
-window.showCustomerProfile = showCustomerProfile;
+window.showCustomerProfile =
+showCustomerProfile;
