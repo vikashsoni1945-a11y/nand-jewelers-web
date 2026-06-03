@@ -2242,6 +2242,12 @@ async function showCustomerProfile() {
   );
 
   customerLedger.forEach(l=>{
+ if(
+  l.type === "Opening Balance" &&
+  customerLedger.filter(x=>x.type === "Opening Balance").indexOf(l) > 0
+){
+  return;
+ }   
 
     html += `
     <div class="bill">
