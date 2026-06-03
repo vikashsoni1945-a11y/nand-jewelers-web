@@ -2089,3 +2089,63 @@ async function showTopPurchaseCustomers() {
 }
 
 window.showTopPurchaseCustomers = showTopPurchaseCustomers;
+
+async function showCustomerProfile() {
+
+  let search =
+  document.getElementById(
+    "profileCustomer"
+  ).value.trim();
+
+  if(!search){
+    alert("Enter Customer Name or Mobile");
+    return;
+  }
+
+  let { data: customers } =
+  await db.from("customers").select("*");
+
+  let customer =
+  (customers || []).find(c =>
+    (c.Name || c.name || "")
+    .toLowerCase()
+    .includes(search.toLowerCase())
+    ||
+    (c.mobile || "")
+    .includes(search)
+  );
+
+  if(!customer){
+    document.getElementById(
+      "profileResult"
+    ).innerHTML =
+    "Customer Not Found";
+    return;
+  }
+
+  let html = `
+    <div class="bill">
+      <b>Name:</b>
+      ${customer.Name || customer.name || ""}<br>
+
+      <b>Mobile:</b>
+      ${customer.mobile || "-"}<br>
+
+      <b>Balance:</b>
+      ${money(customer.balance || 0)}<br>
+
+      <b>City:</b>
+      ${customer.city || "-"}<br>
+
+      <b>Notes:</b>
+      ${customer.notes || customer.customerNotes || "-"}
+    </div>
+  `;
+
+  document.getElementById(
+    "profileResult"
+  ).innerHTML = html;
+}
+
+window.showCustomerProfile =
+showCustomerProfile;
