@@ -1664,5 +1664,4 @@ async function dateWiseReport(){
 }
 
 window.dateWiseReport = dateWiseReport;
-alert("DATE REPORT LOADED");
 window.dateWiseReport = dateWiseReport;
