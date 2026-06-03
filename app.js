@@ -1839,3 +1839,20 @@ function scrollToSection(id){
 }
 
 window.scrollToSection = scrollToSection;
+function loadHeaderDate(){
+
+  let d = new Date();
+
+  document.getElementById(
+    "todayDate"
+  ).innerText =
+  d.toLocaleDateString("en-IN",{
+    day:"2-digit",
+    month:"long",
+    year:"numeric"
+  });
+}
+
+setTimeout(()=>{
+  loadHeaderDate();
+},1000);
