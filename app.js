@@ -2004,3 +2004,33 @@ function loadHeaderDate(){
 setTimeout(()=>{
   loadHeaderDate();
 },1000);
+async function showTopPendingCustomers() {
+
+    let { data: customers } =
+    await db.from("customers").select("*");
+
+    customers = (customers || [])
+    .filter(c => Number(c.balance || 0) > 0)
+    .sort((a,b) =>
+        Number(b.balance || 0) -
+        Number(a.balance || 0)
+    )
+    .slice(0,5);
+
+    let html = "";
+
+    customers.forEach((c,i)=>{
+        html += `
+        <div class="bill">
+        ${i+1}. ${c.Name || c.name || ""}
+        <br>
+        Pending:
+        ${money(c.balance)}
+        </div>
+        `;
+    });
+
+    document.getElementById(
+        "topPendingResult"
+    ).innerHTML = html;
+}
