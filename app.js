@@ -2037,50 +2037,55 @@ async function showTopPendingCustomers() {
 
 async function showTopPurchaseCustomers() {
 
-    let { data: purchases } =
-    await db.from("purchases").select("*");
+  let { data: purchases, error } =
+  await db.from("purchases").select("*");
 
-    let totals = {};
+  if(error){
+    document.getElementById("topPurchaseResult").innerHTML =
+    "Error: " + error.message;
+    return;
+  }
 
-    (purchases || []).forEach(p => {
+  if(!purchases || purchases.length === 0){
+    document.getElementById("topPurchaseResult").innerHTML =
+    "No Purchase Found";
+    return;
+  }
 
-        let name =
-        p.customer_name || "Unknown";
+  let totals = {};
 
-        let amount =
-        Number(
-        p.total_amount ||
-        p.total || 0
-        );
+  purchases.forEach(p => {
 
-        totals[name] =
-        (totals[name] || 0)
-        + amount;
+    let name =
+    p.name ||
+    p.customer_name ||
+    p.mobile ||
+    "Unknown";
 
-    });
+    let amount =
+    Number(p.total_amount || p.total || 0);
 
-    let top =
-    Object.entries(totals)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,5);
+    totals[name] =
+    (totals[name] || 0) + amount;
+  });
 
-    let html = "";
+  let top =
+  Object.entries(totals)
+  .sort((a,b)=>b[1]-a[1])
+  .slice(0,5);
 
-    top.forEach((c,i)=>{
+  let html = "";
 
-        html += `
-        <div class="bill">
-        ${i+1}. ${c[0]}
-        <br>
-        Purchase:
-        ${money(c[1])}
-        </div>
-        `;
+  top.forEach((c,i)=>{
+    html += `
+    <div class="bill">
+    ${i+1}. ${c[0]}<br>
+    Purchase: ${money(c[1])}
+    </div>
+    `;
+  });
 
-    });
-
-    document.getElementById(
-    "topPurchaseResult"
-    ).innerHTML = html;
-
+  document.getElementById("topPurchaseResult").innerHTML = html;
 }
+
+window.showTopPurchaseCustomers = showTopPurchaseCustomers;
