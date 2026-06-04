@@ -722,6 +722,98 @@ async function goldPurchase(){
   await showCustomers();
   await updateDashboard();
 }
+async function silverPurchase(){
+
+  let input =
+  document.getElementById("silverCustomer").value;
+
+  let item =
+  document.getElementById("silverItemName").value;
+
+  let weight =
+  Number(document.getElementById("silverWeight").value);
+
+  let rate =
+  Number(document.getElementById("silverRate").value);
+
+  let making =
+  Number(document.getElementById("silverMaking").value);
+
+  let c =
+  await findCustomer(input);
+
+  if(!c || c.multiple || !item || isNaN(weight) || isNaN(rate) || isNaN(making)){
+    alert("Silver purchase details गलत हैं या customer same name वाला है");
+    return;
+  }
+
+  let silverAmount =
+  weight * rate;
+
+  let total =
+  silverAmount + making;
+
+  let newBalance =
+  Number(c.balance || 0) + total;
+
+  let { error: purchaseError } =
+  await db.from("purchases").insert([{
+    name: c.Name || "",
+    mobile: c.mobile || "",
+    metal_type: "Silver",
+    making_type: "Rupees",
+    making_amount: making,
+    item_name: item,
+    weight: weight,
+    silver_rate: rate,
+    total_amount: total,
+    created_at: nowISO()
+  }]);
+
+  if(purchaseError){
+    alert("Silver Purchase Error: " + purchaseError.message);
+    return;
+  }
+
+  let { error: updateError } =
+  await db
+  .from("customers")
+  .update({balance:newBalance})
+  .eq("id", c.id);
+
+  if(updateError){
+    alert("Balance Update Error: " + updateError.message);
+    return;
+  }
+
+  await addLedger(
+    c,
+    "Silver Purchase - " + item,
+    total,
+    newBalance
+  );
+
+  document.getElementById("silverBillResult").innerHTML = `
+  <div class="bill">
+  <b>Silver Purchase Saved</b><br>
+  Customer: ${c.Name || ""}<br>
+  Item: ${item}<br>
+  Weight: ${weight} gm<br>
+  Rate: ${money(rate)} / gm<br>
+  Silver Amount: ${money(silverAmount)}<br>
+  Making: ${money(making)}<br>
+  Total: ${money(total)}<br>
+  New Balance: ${money(newBalance)}
+  </div>
+  `;
+
+  alert("Silver Purchase Saved");
+
+  await showCustomers();
+  await updateDashboard();
+}
+
+window.silverPurchase = silverPurchase;
 
 async function generateBill(){
   let input = document.getElementById("purchaseCustomer").value;
