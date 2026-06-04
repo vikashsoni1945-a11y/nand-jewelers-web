@@ -2045,10 +2045,27 @@ async function autoBackup(){
     expenses: expenses || []
   };
 
-  localStorage.setItem(
-    "nand_jewelers_auto_backup",
-    JSON.stringify(backup)
-  );
+  let backups =
+JSON.parse(
+localStorage.getItem("nand_jewelers_backup_history")
+|| "[]"
+);
+
+backups.unshift(backup);
+
+if(backups.length > 10){
+  backups = backups.slice(0,10);
+}
+
+localStorage.setItem(
+  "nand_jewelers_backup_history",
+  JSON.stringify(backups)
+);
+
+localStorage.setItem(
+  "nand_jewelers_auto_backup",
+  JSON.stringify(backup)
+);
 
   console.log("Auto Backup Saved");
 }
