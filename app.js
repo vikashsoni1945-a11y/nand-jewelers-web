@@ -2019,6 +2019,43 @@ async function downloadBackup(){
 
 window.downloadBackup = downloadBackup;
 
+async function autoBackup(){
+
+  let { data: customers } =
+  await db.from("customers").select("*");
+
+  let { data: ledger } =
+  await db.from("ledger").select("*");
+
+  let { data: purchases } =
+  await db.from("purchases").select("*");
+
+  let { data: deposits } =
+  await db.from("deposits").select("*");
+
+  let { data: expenses } =
+  await db.from("expenses").select("*");
+
+  let backup = {
+    date: new Date().toLocaleString("en-IN"),
+    customers: customers || [],
+    ledger: ledger || [],
+    purchases: purchases || [],
+    deposits: deposits || [],
+    expenses: expenses || []
+  };
+
+  localStorage.setItem(
+    "nand_jewelers_auto_backup",
+    JSON.stringify(backup)
+  );
+
+  console.log("Auto Backup Saved");
+}
+
+setTimeout(()=>{
+  autoBackup();
+},5000);
 async function dateWiseReport(){
 
   let fromDate =
