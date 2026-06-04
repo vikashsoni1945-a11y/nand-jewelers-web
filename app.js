@@ -1538,6 +1538,75 @@ async function deletePurchase(){
 
 window.deletePurchase = deletePurchase;
 
+async function deletePayment(){
+
+  let input =
+  document.getElementById("deletePaymentMobile").value.trim();
+
+  let amount =
+  Number(document.getElementById("deletePaymentAmount").value);
+
+  if(!input || isNaN(amount) || amount <= 0){
+    alert("Customer और payment amount सही डालो");
+    return;
+  }
+
+  if(!confirm("क्या आप सच में यह payment delete करना चाहते हो?")){
+    return;
+  }
+
+  let customer =
+  await findCustomer(input);
+
+  if(!customer || customer.multiple){
+    document.getElementById("deletePaymentResult").innerHTML =
+    "Customer Not Found या same name वाले multiple customer हैं";
+    return;
+  }
+
+  let { data: ledger, error } =
+  await db.from("ledger")
+  .select("*")
+  .eq("mobile", customer.mobile)
+  .eq("amount", amount);
+
+  if(error || !ledger || ledger.length === 0){
+    document.getElementById("deletePaymentResult").innerHTML =
+    "Payment Entry Not Found";
+    return;
+  }
+
+  let paymentEntry =
+  ledger.find(l =>
+    String(l.type || "").includes("Payment")
+  );
+
+  if(!paymentEntry){
+    document.getElementById("deletePaymentResult").innerHTML =
+    "Payment Entry Not Found";
+    return;
+  }
+
+  let newBalance =
+  Number(customer.balance || 0) + amount;
+
+  await db.from("customers")
+  .update({balance:newBalance})
+  .eq("id", customer.id);
+
+  await db.from("ledger")
+  .delete()
+  .eq("id", paymentEntry.id);
+
+  document.getElementById("deletePaymentResult").innerHTML =
+  "Payment Deleted & Balance Updated";
+
+  alert("Payment Deleted");
+
+  await updateDashboard();
+}
+
+window.deletePayment = deletePayment;
 async function showExpenseHistory(){
   let { data, error } = await db
     .from("expenses")
