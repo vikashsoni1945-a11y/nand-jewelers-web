@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8b0045">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NAND JEWELERS">>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nand Jewelers</title>
 
@@ -703,5 +707,10 @@ Generate Date Report
 <button onclick="scrollToSection('moreSection')">⚙️<br>More</button>
 </div>
 <script src="app.js"></script>
+ <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script> 
 </body>
 </html>
