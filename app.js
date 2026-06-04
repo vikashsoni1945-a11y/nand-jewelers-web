@@ -2073,6 +2073,85 @@ localStorage.setItem(
 setTimeout(()=>{
   autoBackup();
 },5000);
+function showBackupHistory(){
+
+  let backups =
+  JSON.parse(
+    localStorage.getItem(
+      "nand_jewelers_backup_history"
+    ) || "[]"
+  );
+
+  if(backups.length === 0){
+
+    document.getElementById(
+      "backupHistoryResult"
+    ).innerHTML =
+    "<div class='card'>No Backup Found</div>";
+
+    return;
+  }
+
+  let html =
+  "<h3>Backup History</h3>";
+
+  backups.forEach((b,index)=>{
+
+    html += `
+    <div class="card">
+      <b>Backup #${index+1}</b><br>
+      Date: ${b.date}<br>
+
+      <button
+      onclick="downloadBackupByIndex(${index})">
+      Download Backup
+      </button>
+    </div>
+    `;
+  });
+
+  document.getElementById(
+    "backupHistoryResult"
+  ).innerHTML = html;
+}
+
+function downloadBackupByIndex(index){
+
+  let backups =
+  JSON.parse(
+    localStorage.getItem(
+      "nand_jewelers_backup_history"
+    ) || "[]"
+  );
+
+  let backup =
+  backups[index];
+
+  let blob =
+  new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:"application/json"}
+  );
+
+  let a =
+  document.createElement("a");
+
+  a.href =
+  URL.createObjectURL(blob);
+
+  a.download =
+  "nand_backup_" +
+  (index+1) +
+  ".json";
+
+  a.click();
+}
+
+window.showBackupHistory =
+showBackupHistory;
+
+window.downloadBackupByIndex =
+downloadBackupByIndex;
 async function dateWiseReport(){
 
   let fromDate =
