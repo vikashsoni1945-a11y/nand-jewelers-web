@@ -1467,6 +1467,76 @@ async function showDepositHistory(){
 
 window.showDepositHistory = showDepositHistory;
 window.showDepositHistory = showDepositHistory;
+async function deletePurchase(){
+
+  let id =
+  document.getElementById("deletePurchaseId").value.trim();
+
+  if(!id){
+    alert("Purchase ID डालो");
+    return;
+  }
+
+  if(!confirm("क्या आप सच में यह purchase delete करना चाहते हो?")){
+    return;
+  }
+
+  let { data: purchase, error } =
+  await db.from("purchases")
+  .select("*")
+  .eq("id", id)
+  .single();
+
+  if(error || !purchase){
+    document.getElementById("deletePurchaseResult").innerHTML =
+    "Purchase Not Found";
+    return;
+  }
+
+  let { data: customers } =
+  await db.from("customers").select("*");
+
+  let customer =
+  (customers || []).find(c =>
+    String(c.mobile || "") === String(purchase.mobile || "") ||
+    String(c.Name || "").toLowerCase() ===
+    String(purchase.name || "").toLowerCase()
+  );
+
+  if(!customer){
+    document.getElementById("deletePurchaseResult").innerHTML =
+    "Customer Not Found";
+    return;
+  }
+
+  let amount =
+  Number(purchase.total_amount || purchase.total || 0);
+
+  let newBalance =
+  Number(customer.balance || 0) - amount;
+
+  await db.from("customers")
+  .update({balance:newBalance})
+  .eq("id", customer.id);
+
+  await db.from("purchases")
+  .delete()
+  .eq("id", id);
+
+  await db.from("ledger")
+  .delete()
+  .eq("mobile", purchase.mobile)
+  .eq("amount", amount);
+
+  document.getElementById("deletePurchaseResult").innerHTML =
+  "Purchase Deleted & Balance Updated";
+
+  alert("Purchase Deleted");
+
+  await updateDashboard();
+}
+
+window.deletePurchase = deletePurchase;
 
 async function showExpenseHistory(){
   let { data, error } = await db
