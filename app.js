@@ -1607,6 +1607,39 @@ async function deletePayment(){
 }
 
 window.deletePayment = deletePayment;
+async function sharePendingWhatsApp(){
+
+  let input =
+  document.getElementById("statementCustomer").value;
+
+  let c =
+  await findCustomer(input);
+
+  if(!c || c.multiple){
+    alert("Customer Not Found");
+    return;
+  }
+
+  let msg =
+`🏪 NAND JEWELERS
+
+Customer: ${c.Name || ""}
+
+Mobile: ${c.mobile || ""}
+
+Pending Balance: ${money(c.balance)}
+
+Thank You 🙏`;
+
+  window.open(
+    "https://wa.me/?text=" +
+    encodeURIComponent(msg),
+    "_blank"
+  );
+}
+
+window.sharePendingWhatsApp =
+sharePendingWhatsApp;
 async function showExpenseHistory(){
   let { data, error } = await db
     .from("expenses")
